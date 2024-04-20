@@ -26,8 +26,6 @@ namespace MyJUCEModules {
 
 			auto stateCopy = valueTreeState.copyState();
 
-			removeUnwantedParamsFromTree(stateCopy);
-
 			const auto xml = stateCopy.createXml();
 			if (!xml->writeTo(presetFile)) {
 				DBG("Failed to write preset: " + presetFile.getFullPathName());
@@ -77,7 +75,6 @@ namespace MyJUCEModules {
 		void copyPreset() {
 			auto stateCopy = valueTreeState.copyState();
 
-			removeUnwantedParamsFromTree(stateCopy);
 			const auto xml = stateCopy.createXml();
 			xml->setAttribute("pluginName", JucePlugin_Name);
 			const auto clipBoardFile = defaultDirectory.getParentDirectory().getChildFile("Clipboard." + extension);
