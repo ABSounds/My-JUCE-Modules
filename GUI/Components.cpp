@@ -45,24 +45,26 @@ namespace MyJUCEModules {
 	{
 		undoIcon = juce::Drawable::createFromImageData(BinaryData::arrowgobackline_svg, BinaryData::arrowgobackline_svgSize);
 		configureIconButton(undoButton, undoIcon->createCopy());
-		undoButton.setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnRight);
 		redoIcon = juce::Drawable::createFromImageData(BinaryData::arrowgoforwardline_svg, BinaryData::arrowgobackline_svgSize);
 		configureIconButton(redoButton, redoIcon->createCopy());
-		
-		redoButton.setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnLeft);
+
 		copyIcon = juce::Drawable::createFromImageData(BinaryData::filecopyline_svg, BinaryData::filecopyline_svgSize);
 		configureIconButton(copyButton, copyIcon->createCopy());
+		
 		configureArrowButton(previousPresetButton);
 		configureComboBox(presetComboBox, "No preset");
 		configureArrowButton(nextPresetButton);
+		
 		optionsIcon = juce::Drawable::createFromImageData(BinaryData::menuline_svg, BinaryData::menuline_svgSize);
 		configureIconButton(optionsButton, optionsIcon->createCopy());
+		
 		configureTextButton(aButton, "A");
 		aButton.setClickingTogglesState(true);
 		aButton.setToggleState(true, juce::dontSendNotification);
 		configureTextButton(copyAtoBButton, ">");
 		configureTextButton(bButton, "B");
 		bButton.setClickingTogglesState(true);
+		
 		bypassIcon= juce::Drawable::createFromImageData(BinaryData::shutdownline_svg, BinaryData::shutdownline_svgSize);
 		configureIconButton(bypassButton, bypassIcon->createCopy());
 		bypassButton.setClickingTogglesState(true);
@@ -145,16 +147,21 @@ namespace MyJUCEModules {
 		nextPresetButton.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(.7f * buttonHeight).reduced(0.21f * buttonHeight));
 
 		copyButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
+		
 		leftSideBounds.removeFromRight(2.f * buttonHeight);
+		
 		redoButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
 		leftSideBounds.removeFromRight(.25f * buttonHeight);
 		undoButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
 
 		optionsButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight).reduced(0.1f * buttonHeight));
+		
 		rightSideBounds.removeFromLeft(2.f * buttonHeight);
+		
 		aButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight));
 		copyAtoBButton.setBounds(rightSideBounds.removeFromLeft(.82f * buttonHeight));
 		bButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight));
+		
 		bypassButton.setBounds(rightSideBounds.removeFromRight(buttonHeight).reduced(0.1f * buttonHeight));
 	}
 

@@ -68,8 +68,8 @@ namespace MyJUCEModules {
         juce::UndoManager& undoManager;
         juce::AudioParameterChoice& guiSize;
         
-        juce::String pluginName = "  " + juce::String(JucePlugin_Name);
-        juce::String pluginVersion = "  v" + juce::String(JucePlugin_VersionString);
+        juce::String pluginName = "  " + juce::String(JucePlugin_Name) + " ";
+        juce::String pluginVersion = " v" + juce::String(JucePlugin_VersionString);
 
         std::unique_ptr<juce::Drawable> undoIcon, redoIcon, copyIcon, optionsIcon, bypassIcon;
 
