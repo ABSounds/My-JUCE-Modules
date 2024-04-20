@@ -1,3 +1,1 @@
-icons from: https://icons.getbootstrap.com/icons
-
-https://www.untitledui.com/blog/free-icon-sets
+All icons taken from https://remixicon.com/
