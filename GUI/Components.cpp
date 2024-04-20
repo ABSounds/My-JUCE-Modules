@@ -40,21 +40,22 @@ namespace MyJUCEModules {
     // =====================================  PluginPanel  ================================================
 
 	PluginPanel::PluginPanel(PresetManager& pm, juce::RangedAudioParameter& gS, juce::UndoManager& uM) :
-		presetManager(pm),
-		undoManager(uM),
-        guiSize(dynamic_cast<juce::AudioParameterChoice&>(gS)),
-		previousPresetButton("Previous", 0.5f, juce::Colours::white),
+		presetManager(pm), undoManager(uM), guiSize(dynamic_cast<juce::AudioParameterChoice&>(gS)), previousPresetButton("Previous", 0.5f, juce::Colours::white),
 		nextPresetButton("Next", 1.0f, juce::Colours::white)
 	{
-		configureTextButton(undoButton, "<");
+		undoIconNormal = juce::Drawable::createFromImageData(BinaryData::arrowgobackline_svg, BinaryData::arrowgobackline_svgSize);
+		configureIconButton(undoButton, undoIconNormal.get(), nullptr, nullptr);
 		undoButton.setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnRight);
-		configureTextButton(redoButton, ">");
+		redoIconNormal = juce::Drawable::createFromImageData(BinaryData::arrowgoforwardline_svg, BinaryData::arrowgobackline_svgSize);
+		configureIconButton(redoButton, redoIconNormal.get(), nullptr, nullptr);
 		redoButton.setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnLeft);
-		configureTextButton(copyButton, "C");
+		copyIconNormal = juce::Drawable::createFromImageData(BinaryData::filecopyline_svg, BinaryData::filecopyline_svgSize);
+		configureIconButton(copyButton, copyIconNormal.get(), nullptr, nullptr);
 		configureArrowButton(previousPresetButton);
 		configureComboBox(presetComboBox, "No preset");
 		configureArrowButton(nextPresetButton);
-		configureTextButton(optionsButton, "...");
+		optionsIconNormal = juce::Drawable::createFromImageData(BinaryData::menuline_svg, BinaryData::menuline_svgSize);
+		configureIconButton(optionsButton, optionsIconNormal.get(), nullptr, nullptr);
 		configureTextButton(aButton, "A");
 		aButton.setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnRight);
 		aButton.setClickingTogglesState(true);
@@ -64,7 +65,8 @@ namespace MyJUCEModules {
 		configureTextButton(bButton, "B");
 		bButton.setConnectedEdges(juce::Button::ConnectedEdgeFlags::ConnectedOnLeft);
 		bButton.setClickingTogglesState(true);
-		configureTextButton(bypassButton, "O");
+		bypassIconNormal = juce::Drawable::createFromImageData(BinaryData::shutdownline_svg, BinaryData::shutdownline_svgSize);
+		configureIconButton(bypassButton, bypassIconNormal.get(), nullptr, nullptr);
 
 		const auto allPresets = presetManager.getAllPresets();
 		const auto currentPreset = presetManager.getCurrentPresetName();
@@ -140,14 +142,15 @@ namespace MyJUCEModules {
 		copyButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
 		leftSideBounds.removeFromRight(2.f * buttonHeight);
 		redoButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
+		leftSideBounds.removeFromRight(.25f * buttonHeight);
 		undoButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
 
-		optionsButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight).reduced(0.025f * buttonHeight));
+		optionsButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight).reduced(0.1f * buttonHeight));
 		rightSideBounds.removeFromLeft(2.f * buttonHeight);
 		aButton.setBounds(rightSideBounds.removeFromLeft(.75f * buttonHeight).reduced(0.025f * buttonHeight));
 		copyAtoBButton.setBounds(rightSideBounds.removeFromLeft(.5f * buttonHeight).reduced(0.025f * buttonHeight));
 		bButton.setBounds(rightSideBounds.removeFromLeft(.75f * buttonHeight).reduced(0.025f * buttonHeight));
-		bypassButton.setBounds(rightSideBounds.removeFromRight(buttonHeight).reduced(0.025f * buttonHeight));
+		bypassButton.setBounds(rightSideBounds.removeFromRight(buttonHeight).reduced(0.05f * buttonHeight));
 	}
 
 	void PluginPanel::buttonClicked(juce::Button* button) {
@@ -234,6 +237,14 @@ namespace MyJUCEModules {
 			juce::File file(presetManager.defaultDirectory.getChildFile(presetComboBox.getItemText(presetComboBox.getSelectedItemIndex()) + "." + presetManager.extension));
 			presetManager.loadPreset(file);
 		}
+	}
+
+	void PluginPanel::configureIconButton(juce::Button& button, juce::Drawable* normalImage, juce::Drawable* overImage, juce::Drawable* downImage) {
+		button.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+		auto iconButton = dynamic_cast<juce::DrawableButton*>(&button);
+		iconButton->setImages(normalImage, overImage, downImage);
+		addAndMakeVisible(button);
+		button.addListener(this);
 	}
 
 	void PluginPanel::configureTextButton(juce::Button& button, const juce::String& buttonText) {

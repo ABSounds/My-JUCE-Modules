@@ -60,6 +60,7 @@ namespace MyJUCEModules {
         void buttonClicked(juce::Button* button) override;
         void comboBoxChanged(juce::ComboBox* comboBox) override;
         void configureComboBox(juce::ComboBox& comboBox, const juce::String& textWhenNothingSelected);
+        void configureIconButton(juce::Button& button, juce::Drawable* normalImage, juce::Drawable* overImage, juce::Drawable* downImage);
         void configureTextButton(juce::Button& button, const juce::String& buttonText);
         void configureArrowButton(juce::Button& button);
 
@@ -67,10 +68,22 @@ namespace MyJUCEModules {
         juce::UndoManager& undoManager;
         juce::AudioParameterChoice& guiSize;
 
-        juce::String pluginInfo = "  " + juce::String(JucePlugin_Name) + "  v" + juce::String(JucePlugin_VersionString) + " ";
-        juce::TextButton undoButton, redoButton, copyButton, optionsButton, aButton, copyAtoBButton, bButton, bypassButton;
+        juce::String pluginInfo = "  " + juce::String(JucePlugin_Name) + "  v" + juce::String(JucePlugin_VersionString);
+
+        std::unique_ptr<juce::Drawable> undoIconNormal, undoIconOver, undoIconDown, redoIconNormal, redoIconOver, redoIconDown,
+            copyIconNormal, copyIconOver, copyIconDown, optionsIconNormal, optionsIconOver, optionsIconDown,
+            bypassIconNormal, bypassIconOver, bypassIconDown;
+
+        juce::DrawableButton undoButton{ "undo", juce::DrawableButton::ButtonStyle::ImageFitted }, redoButton{ "redo", juce::DrawableButton::ButtonStyle::ImageFitted },
+            copyButton{ "copy", juce::DrawableButton::ButtonStyle::ImageFitted }, optionsButton{ "options", juce::DrawableButton::ButtonStyle::ImageFitted },
+            bypassButton{ "bypass", juce::DrawableButton::ButtonStyle::ImageFitted };
+        
+        juce::TextButton aButton, copyAtoBButton, bButton;
+        
         ArrowButton previousPresetButton, nextPresetButton;
+        
         juce::ComboBox presetComboBox;
+        
         std::unique_ptr<juce::FileChooser> presetFileChooser;
 
         PluginPanelLookAndFeel lookAndFeel;
