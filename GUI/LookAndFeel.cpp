@@ -3,16 +3,17 @@
 namespace MyJUCEModules {
 
     PluginPanelLookAndFeel::PluginPanelLookAndFeel() {
-        setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::grey);
-        setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::darkgrey);
-        setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colours::white);
-        setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colours::white);
-        setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::grey);
-        setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::darkgrey);
-        setColour(juce::ComboBox::ColourIds::arrowColourId, juce::Colours::white);
-        setColour(juce::ComboBox::ColourIds::textColourId, juce::Colours::white);
-        setColour(juce::PopupMenu::ColourIds::backgroundColourId, juce::Colours::grey);
-        setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, juce::Colours::grey.darker());
+        setColour(juce::TextButton::ColourIds::buttonColourId, juce::Colours::gainsboro.darker());
+        setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::gainsboro.darker());
+        setColour(juce::TextButton::ColourIds::textColourOnId, baseTextColour);
+        setColour(juce::TextButton::ColourIds::textColourOffId, baseTextColour);
+        setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::gainsboro.darker().darker());
+        setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::gainsboro.darker().darker().darker());
+        setColour(juce::ComboBox::ColourIds::arrowColourId, baseTextColour);
+        setColour(juce::ComboBox::ColourIds::textColourId, baseTextColour);
+        setColour(juce::PopupMenu::ColourIds::backgroundColourId, juce::Colours::gainsboro.darker());
+        setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, juce::Colours::gainsboro.darker().darker());
+        setColour(juce::PopupMenu::ColourIds::textColourId, baseTextColour);
     }
     
     juce::Font PluginPanelLookAndFeel::getComboBoxFont(juce::ComboBox& box) {
@@ -74,14 +75,14 @@ namespace MyJUCEModules {
 
             g.fillPath(path);
 
-            g.setColour(button.findColour(juce::ComboBox::outlineColourId));
+            g.setColour(button.findColour(juce::TextButton::buttonColourId));
             g.strokePath(path, juce::PathStrokeType(1.5f));
         }
         else
         {
             g.fillRoundedRectangle(bounds, cornerSize);
 
-            g.setColour(button.findColour(juce::ComboBox::outlineColourId));
+            g.setColour(button.findColour(juce::TextButton::buttonColourId));
             g.drawRoundedRectangle(bounds, cornerSize, 1.5f);
         }
     };

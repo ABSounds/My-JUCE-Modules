@@ -60,19 +60,18 @@ namespace MyJUCEModules {
         void buttonClicked(juce::Button* button) override;
         void comboBoxChanged(juce::ComboBox* comboBox) override;
         void configureComboBox(juce::ComboBox& comboBox, const juce::String& textWhenNothingSelected);
-        void configureIconButton(juce::Button& button, juce::Drawable* normalImage, juce::Drawable* overImage, juce::Drawable* downImage);
+        void configureIconButton(juce::Button& button, std::unique_ptr<juce::Drawable> icon);
         void configureTextButton(juce::Button& button, const juce::String& buttonText);
         void configureArrowButton(juce::Button& button);
 
         PresetManager& presetManager;
         juce::UndoManager& undoManager;
         juce::AudioParameterChoice& guiSize;
+        
+        juce::String pluginName = "  " + juce::String(JucePlugin_Name);
+        juce::String pluginVersion = "  v" + juce::String(JucePlugin_VersionString);
 
-        juce::String pluginInfo = "  " + juce::String(JucePlugin_Name) + "  v" + juce::String(JucePlugin_VersionString);
-
-        std::unique_ptr<juce::Drawable> undoIconNormal, undoIconOver, undoIconDown, redoIconNormal, redoIconOver, redoIconDown,
-            copyIconNormal, copyIconOver, copyIconDown, optionsIconNormal, optionsIconOver, optionsIconDown,
-            bypassIconNormal, bypassIconOver, bypassIconDown;
+        std::unique_ptr<juce::Drawable> undoIcon, redoIcon, copyIcon, optionsIcon, bypassIcon;
 
         juce::DrawableButton undoButton{ "undo", juce::DrawableButton::ButtonStyle::ImageFitted }, redoButton{ "redo", juce::DrawableButton::ButtonStyle::ImageFitted },
             copyButton{ "copy", juce::DrawableButton::ButtonStyle::ImageFitted }, optionsButton{ "options", juce::DrawableButton::ButtonStyle::ImageFitted },
@@ -85,6 +84,8 @@ namespace MyJUCEModules {
         juce::ComboBox presetComboBox;
         
         std::unique_ptr<juce::FileChooser> presetFileChooser;
+
+        juce::Colour textBaseColour = juce::Colours::gainsboro.darker().darker().darker().darker();
 
         PluginPanelLookAndFeel lookAndFeel;
 

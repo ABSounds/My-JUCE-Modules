@@ -18,5 +18,6 @@ namespace MyJUCEModules {
         void drawImageButton(juce::Graphics&, juce::Image*, int imageX, int imageY, int imageW, int imageH, const juce::Colour& overlayColour, float imageOpacity, juce::ImageButton&) override;
     private:
         float cornerSize = 4.0f;
+        juce::Colour baseTextColour = juce::Colours::gainsboro.darker().darker().darker().darker();
     };
 }
