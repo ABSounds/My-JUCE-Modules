@@ -7,13 +7,15 @@ namespace MyJUCEModules {
         setColour(juce::TextButton::ColourIds::buttonOnColourId, juce::Colours::gainsboro.darker());
         setColour(juce::TextButton::ColourIds::textColourOnId, baseTextColour);
         setColour(juce::TextButton::ColourIds::textColourOffId, baseTextColour);
-        setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::gainsboro.darker().darker());
+        setColour(juce::ComboBox::ColourIds::backgroundColourId, juce::Colours::gainsboro.darker().darker(0.2f));
         setColour(juce::ComboBox::ColourIds::outlineColourId, juce::Colours::gainsboro.darker().darker().darker());
         setColour(juce::ComboBox::ColourIds::arrowColourId, baseTextColour);
-        setColour(juce::ComboBox::ColourIds::textColourId, baseTextColour);
+        setColour(juce::ComboBox::ColourIds::textColourId, baseTextColour.darker(0.2f));
         setColour(juce::PopupMenu::ColourIds::backgroundColourId, juce::Colours::gainsboro.darker());
         setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, juce::Colours::gainsboro.darker().darker());
         setColour(juce::PopupMenu::ColourIds::textColourId, baseTextColour);
+        setColour(juce::PopupMenu::ColourIds::highlightedTextColourId, baseTextColour.darker());
+        setColour(juce::PopupMenu::ColourIds::headerTextColourId, baseTextColour);
     }
     
     juce::Font PluginPanelLookAndFeel::getComboBoxFont(juce::ComboBox& box) {

@@ -226,14 +226,18 @@ namespace MyJUCEModules {
 				});
 			});
 			m.addItem("Paste", [this] { presetManager.pastePreset(); });
+
 			m.addSeparator();
-			m.addSectionHeader("GUI zoom");
+			
+			juce::PopupMenu guiSizesMenu;
 			auto choices = guiSize.getAllValueStrings();
+
 			for (auto i = 0; i < choices.size(); i++) {
-				m.addItem(choices[i], !(i == guiSize.getIndex()), false, [this, i] {
+				guiSizesMenu.addItem(choices[i], !(i == guiSize.getIndex()), (i == guiSize.getIndex()), [this, i] {
 					guiSize.operator=(i);
 				});
 			}
+			m.addSubMenu("GUI Size", guiSizesMenu);
 			m.showMenuAsync(juce::PopupMenu::Options{}.withTargetComponent(&optionsButton));
 			m.setLookAndFeel(nullptr);
 		}
