@@ -43,10 +43,14 @@ namespace MyJUCEModules {
 		presetManager(pm), undoManager(uM), guiSize(dynamic_cast<juce::AudioParameterChoice&>(gS)), previousPresetButton("Previous", 0.5f, juce::Colours::gainsboro.darker().darker().darker()),
 		nextPresetButton("Next", 1.0f, juce::Colours::gainsboro.darker().darker().darker())
 	{
+		undoManager.addChangeListener(this);
+
 		undoIcon = juce::Drawable::createFromImageData(BinaryData::arrowgobackline_svg, BinaryData::arrowgobackline_svgSize);
 		configureIconButton(undoButton, undoIcon->createCopy());
+		undoButton.setEnabled(false);
 		redoIcon = juce::Drawable::createFromImageData(BinaryData::arrowgoforwardline_svg, BinaryData::arrowgobackline_svgSize);
 		configureIconButton(redoButton, redoIcon->createCopy());
+		redoButton.setEnabled(false);
 
 		copyIcon = juce::Drawable::createFromImageData(BinaryData::filecopyline_svg, BinaryData::filecopyline_svgSize);
 		configureIconButton(copyButton, copyIcon->createCopy());
@@ -168,12 +172,6 @@ namespace MyJUCEModules {
 	void PluginPanel::buttonClicked(juce::Button* button) {
 		if (button == &undoButton) {
 			undoManager.undo();
-			if (undoManager.canUndo()) {
-				undoButton.setEnabled(true);
-			}
-			else {
-				undoButton.setEnabled(false);
-			}
 		}
 		else if (button == &redoButton) {
 			undoManager.redo();
@@ -295,5 +293,12 @@ namespace MyJUCEModules {
 		comboBox.setLookAndFeel(&lookAndFeel);
 		addAndMakeVisible(comboBox);
 		comboBox.addListener(this);
+	}
+
+	void PluginPanel::changeListenerCallback(juce::ChangeBroadcaster* source) {
+		if (source == &undoManager) {
+			undoButton.setEnabled(undoManager.canUndo());
+			redoButton.setEnabled(undoManager.canRedo());
+		}
 	}
 }

@@ -43,7 +43,7 @@ namespace MyJUCEModules {
     /**
     *   @brief Top panel containing the GUI elements for the Preset Manager, undo/redo, resize and A/B configurations functionalities as well as the logo and plugin's version number.
     **/
-    class PluginPanel : public juce::Component, juce::Button::Listener, juce::ComboBox::Listener
+    class PluginPanel : public juce::Component, juce::Button::Listener, juce::ComboBox::Listener, juce::ChangeListener
     {
     public:
         /**
@@ -63,6 +63,8 @@ namespace MyJUCEModules {
         void configureIconButton(juce::Button& button, std::unique_ptr<juce::Drawable> icon);
         void configureTextButton(juce::Button& button, const juce::String& buttonText);
         void configureArrowButton(juce::Button& button);
+
+        void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 
         PresetManager& presetManager;
         juce::UndoManager& undoManager;
