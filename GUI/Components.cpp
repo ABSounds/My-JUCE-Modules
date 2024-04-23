@@ -22,26 +22,54 @@ namespace MyJUCEModules {
 
 	ArrowButton::~ArrowButton() {}
 
-	void ArrowButton::paintButton(juce::Graphics& g, bool /*shouldDrawButtonAsHighlighted*/, bool shouldDrawButtonAsDown)
+	void ArrowButton::paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 	{
 		juce::Path p(path);
+		juce::Colour colourToUse;
 
-		const float offset = shouldDrawButtonAsDown ? 1.0f : 0.0f;
-		p.applyTransform(path.getTransformToScaleToFit(offset, offset, (float)getWidth(), (float)getHeight(), false));
+		if (shouldDrawButtonAsDown)
+			colourToUse = colour.brighter();
+		else if (shouldDrawButtonAsHighlighted)
+			colourToUse = colour.darker();
+		else
+			colourToUse = colour;
 
-		//juce::DropShadow(juce::Colours::black.withAlpha(0.3f), shouldDrawButtonAsDown ? 2 : 4, juce::Point<int>()).drawForPath(g, p);
-		g.setColour(colour);
+		p.applyTransform(path.getTransformToScaleToFit(0.0f, 0.0f, (float)getWidth(), (float)getHeight(), false));
+
+		g.setColour(colourToUse);
 		if (!this->isEnabled())
 			g.setOpacity(0.5f);
 		g.fillPath(p);
+	}
+
+	// =====================================  MyTextButton  ================================================
+	void MyTextButton::paintButton(juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) {
+		juce::Colour colourToUse = colour;
+		auto toggleState = getToggleState();
+
+		if (isMouseOverButton)
+			colourToUse = colour.darker();
+
+		g.setColour(colourToUse.withMultipliedAlpha(this->isEnabled() ? 1.0f : 0.5f));
+
+		juce::Font fontTouUSe = font;
+		if (isButtonDown || toggleState)
+			fontTouUSe = font.boldened();
+		
+		g.setFont(fontTouUSe.withHeight(getHeight() * 0.85f));
+
+		juce::String buttonText = getButtonText();
+
+		if (buttonText.length() > 0)
+			g.drawText(buttonText, getLocalBounds(), juce::Justification::centred);
 	}
 
 
     // =====================================  PluginPanel  ================================================
 
 	PluginPanel::PluginPanel(PresetManager& pm, juce::RangedAudioParameter& gS, juce::UndoManager& uM) :
-		presetManager(pm), undoManager(uM), guiSize(dynamic_cast<juce::AudioParameterChoice&>(gS)), previousPresetButton("Previous", 0.5f, juce::Colours::gainsboro.darker().darker().darker()),
-		nextPresetButton("Next", 1.0f, juce::Colours::gainsboro.darker().darker().darker())
+		presetManager(pm), undoManager(uM), guiSize(dynamic_cast<juce::AudioParameterChoice&>(gS)), previousPresetButton("Previous", 0.5f, juce::Colours::gainsboro.darker().darker().darker().darker()),
+		nextPresetButton("Next", 1.0f, juce::Colours::gainsboro.darker().darker().darker().darker())
 	{
 		undoManager.addChangeListener(this);
 
@@ -70,7 +98,21 @@ namespace MyJUCEModules {
 		bButton.setClickingTogglesState(true);
 		
 		bypassIcon= juce::Drawable::createFromImageData(BinaryData::shutdownline_svg, BinaryData::shutdownline_svgSize);
-		configureIconButton(bypassButton, bypassIcon->createCopy());
+		
+		bypassIcon->replaceColour(juce::Colours::black, textBaseColour);
+		auto normalImage = bypassIcon->createCopy();
+		auto overImage = normalImage->createCopy();
+		overImage->replaceColour(textBaseColour, textBaseColour.darker());
+		auto downImage = normalImage->createCopy();
+		downImage->replaceColour(textBaseColour, textBaseColour.brighter());
+		auto normalImageDown = normalImage->createCopy();
+		normalImageDown->replaceColour(textBaseColour, textBaseColour.brighter());
+		bypassButton.setImages(normalImage.get(), overImage.get(), downImage.get(), nullptr, normalImageDown.get(), normalImageDown.get(), normalImageDown.get(), nullptr);
+		bypassButton.setColour(juce::DrawableButton::ColourIds::backgroundColourId, juce::Colours::gainsboro.darker());
+		bypassButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::gainsboro.darker());
+		bypassButton.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+		addAndMakeVisible(bypassButton);
+		bypassButton.addListener(this);
 		bypassButton.setClickingTogglesState(true);
 
 		const auto allPresets = presetManager.getAllPresets();
@@ -119,7 +161,7 @@ namespace MyJUCEModules {
 		g.setColour(textBaseColour);
 		auto bounds = getLocalBounds();
 
-		juce::Font f1;
+		juce::Font f1 { bounds.getHeight() * 0.6f};
 		auto pluginNameBounds = bounds.removeFromLeft(f1.getStringWidth(pluginName));
 		g.setFont(f1);
 		g.drawText(pluginName, pluginNameBounds, juce::Justification::left);
@@ -146,26 +188,27 @@ namespace MyJUCEModules {
 
 		lookAndFeel.setCornerSize(0.25f * buttonHeight);
 
-		previousPresetButton.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(.7f * buttonHeight).reduced(0.21f * buttonHeight));
-		presetComboBox.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(10.1f * buttonHeight).reduced(0.05f * buttonHeight));
-		nextPresetButton.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(.7f * buttonHeight).reduced(0.21f * buttonHeight));
+		previousPresetButton.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(.7f * buttonHeight).reduced(0.23f * buttonHeight));
+		presetComboBox.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(10.1f * buttonHeight).reduced(0.08f * buttonHeight));
+		nextPresetButton.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(.7f * buttonHeight).reduced(0.23f * buttonHeight));
 
 		copyButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
 		
 		leftSideBounds.removeFromRight(2.f * buttonHeight);
 		
-		redoButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
+		redoButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.075f * buttonHeight));
 		leftSideBounds.removeFromRight(.25f * buttonHeight);
-		undoButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
+		undoButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.075f * buttonHeight));
 
-		optionsButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight).reduced(0.1f * buttonHeight));
+		optionsButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight).reduced(0.15f * buttonHeight));
 		
 		rightSideBounds.removeFromLeft(2.f * buttonHeight);
 		
-		aButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight));
-		copyAtoBButton.setBounds(rightSideBounds.removeFromLeft(.82f * buttonHeight));
-		bButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight));
+		aButton.setBounds(rightSideBounds.removeFromLeft(.75f * buttonHeight));
+		copyAtoBButton.setBounds(rightSideBounds.removeFromLeft(.6f * buttonHeight));
+		bButton.setBounds(rightSideBounds.removeFromLeft(.75f * buttonHeight));
 		
+		rightSideBounds.removeFromRight(0.1f * buttonHeight);
 		bypassButton.setBounds(rightSideBounds.removeFromRight(buttonHeight).reduced(0.1f * buttonHeight));
 	}
 
@@ -270,10 +313,9 @@ namespace MyJUCEModules {
 		button.addListener(this);
 	}
 
-	void PluginPanel::configureTextButton(juce::Button& button, const juce::String& buttonText) {
+	void PluginPanel::configureTextButton(MyJUCEModules::MyTextButton& button, const juce::String& buttonText) {
 		button.setButtonText(buttonText);
 		button.setMouseCursor(juce::MouseCursor::PointingHandCursor);
-		button.setLookAndFeel(&lookAndFeel);
 		addAndMakeVisible(button);
 		button.addListener(this);
 	}

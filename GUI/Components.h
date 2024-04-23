@@ -39,6 +39,22 @@ namespace MyJUCEModules {
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ArrowButton)
     };
 
+    // ====================== MY TEXT BUTTON ======================
+    /**
+    *
+    **/
+    class MyTextButton : public juce::TextButton
+	{
+    public:
+        using juce::TextButton::TextButton;
+        void paintButton(juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) override;
+        void setFont(juce::Font font) { this->font = font; }
+        void setColour(juce::Colour colour) { this->colour = colour; }
+    private:
+        juce::Font font = juce::Font(juce::String("Calibri"), 15.0f, juce::Font::FontStyleFlags::plain);
+        juce::Colour colour = juce::Colours::gainsboro.darker().darker().darker().darker();
+    };
+
     // ====================== PLUGIN PANEL ======================
     /**
     *   @brief Top panel containing the GUI elements for the Preset Manager, undo/redo, resize and A/B configurations functionalities as well as the logo and plugin's version number.
@@ -61,7 +77,7 @@ namespace MyJUCEModules {
         void comboBoxChanged(juce::ComboBox* comboBox) override;
         void configureComboBox(juce::ComboBox& comboBox, const juce::String& textWhenNothingSelected);
         void configureIconButton(juce::Button& button, std::unique_ptr<juce::Drawable> icon);
-        void configureTextButton(juce::Button& button, const juce::String& buttonText);
+        void configureTextButton(MyJUCEModules::MyTextButton& button, const juce::String& buttonText);
         void configureArrowButton(juce::Button& button);
 
         void changeListenerCallback(juce::ChangeBroadcaster* source) override;
@@ -77,9 +93,9 @@ namespace MyJUCEModules {
 
         juce::DrawableButton undoButton{ "undo", juce::DrawableButton::ButtonStyle::ImageFitted }, redoButton{ "redo", juce::DrawableButton::ButtonStyle::ImageFitted },
             copyButton{ "copy", juce::DrawableButton::ButtonStyle::ImageFitted }, optionsButton{ "options", juce::DrawableButton::ButtonStyle::ImageFitted },
-            bypassButton{ "bypass", juce::DrawableButton::ButtonStyle::ImageFitted };
+            bypassButton{ "bypass", juce::DrawableButton::ButtonStyle::ImageFitted};
         
-        juce::TextButton aButton, copyAtoBButton, bButton;
+        MyJUCEModules::MyTextButton aButton, copyAtoBButton, bButton;
         
         ArrowButton previousPresetButton, nextPresetButton;
         
