@@ -169,6 +169,19 @@ namespace MyJUCEModules {
 		auto pluginVersionBounds = bounds.removeFromLeft(f2.getStringWidth(pluginVersion));
 		g.setFont(f2);
 		g.drawText(pluginVersion, pluginVersionBounds, juce::Justification::left);
+
+		// draw a line all over the edges of the component
+		g.setColour(textBaseColour.brighter());
+		g.fillRect(0.0f, 0.0f, (float)getWidth(), 2.0f);
+		g.fillRect(0.0f, 0.0f, 2.0f, (float)getHeight());
+		g.fillRect(0.0f, (float)getHeight() - 2.0f, (float)getWidth(), 2.0f);
+		g.fillRect((float)getWidth() - 2.0f, 0.0f, 2.0f, (float)getHeight());
+
+		g.setColour(textBaseColour.darker());
+		g.drawVerticalLine(0, 0.0f, (float)getHeight());
+		g.drawVerticalLine(getWidth() - 1, 0.0f, (float)getHeight());
+		g.drawHorizontalLine(getHeight() - 1, 0.0f, (float)getWidth());
+		g.drawHorizontalLine(0, 0.0f, (float)getWidth());
 	}
 
 	void PluginPanel::resized() {
