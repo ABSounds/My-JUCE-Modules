@@ -51,7 +51,7 @@ namespace MyJUCEModules {
         void setFont(juce::Font font) { this->font = font; }
         void setColour(juce::Colour colour) { this->colour = colour; }
     private:
-        juce::Font font = juce::Font(juce::String("Calibri"), 15.0f, juce::Font::FontStyleFlags::plain);
+        juce::Font font = juce::Font(juce::String("Calibri"), 11.0f, juce::Font::FontStyleFlags::plain);
         juce::Colour colour = juce::Colours::gainsboro.darker().darker().darker().darker();
     };
 
@@ -67,7 +67,7 @@ namespace MyJUCEModules {
         *   @param guiSize Reference to the plugin's guiSize parameter.
         *   @param undoManager Reference to the plugin's UndoManager object.
         **/
-        PluginPanel(PresetManager& presetManager, juce::RangedAudioParameter& guiSize, juce::UndoManager& undoManager);
+        PluginPanel(PresetManager& pm, juce::UndoManager& uM, juce::AudioProcessorValueTreeState& apvts);
         ~PluginPanel();
         void paint(juce::Graphics& g) override;
         void resized() override;
@@ -84,16 +84,21 @@ namespace MyJUCEModules {
 
         PresetManager& presetManager;
         juce::UndoManager& undoManager;
-        juce::AudioParameterChoice& guiSize;
+        juce::AudioProcessorValueTreeState& pluginApvts;
+        
+        //juce::AudioParameterBool& bypass;
+        //juce::AudioParameterChoice& oversampling, &guiSize;
         
         juce::String pluginName = "  " + juce::String(JucePlugin_Name) + " ";
         juce::String pluginVersion = " v" + juce::String(JucePlugin_VersionString);
 
-        std::unique_ptr<juce::Drawable> undoIcon, redoIcon, copyIcon, optionsIcon, bypassIcon;
+        std::unique_ptr<juce::Drawable> undoIcon, redoIcon, copyIcon, optionsIcon, oversamplingIcon, bypassIcon;
 
         juce::DrawableButton undoButton{ "undo", juce::DrawableButton::ButtonStyle::ImageFitted }, redoButton{ "redo", juce::DrawableButton::ButtonStyle::ImageFitted },
             copyButton{ "copy", juce::DrawableButton::ButtonStyle::ImageFitted }, optionsButton{ "options", juce::DrawableButton::ButtonStyle::ImageFitted },
-            bypassButton{ "bypass", juce::DrawableButton::ButtonStyle::ImageFitted};
+            oversamplingButton{ "oversampling", juce::DrawableButton::ButtonStyle::ImageFitted }, bypassButton{ "bypass", juce::DrawableButton::ButtonStyle::ImageFitted };
+
+        std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> oversamplingAttachment, bypassAttachment;
         
         MyJUCEModules::MyTextButton aButton, copyAtoBButton, bButton;
         

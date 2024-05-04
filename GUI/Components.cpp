@@ -9,6 +9,7 @@
 */
 
 #include "Components.h"
+#include "../../ParameterIDs.h"
 
 namespace MyJUCEModules {
 	// =====================================  ArrowButton  ================================================
@@ -56,7 +57,7 @@ namespace MyJUCEModules {
 		if (isButtonDown || toggleState)
 			fontTouUSe = font.boldened();
 		
-		g.setFont(fontTouUSe.withHeight(getHeight() * 0.85f));
+		g.setFont(fontTouUSe.withHeight(getHeight() * 0.75f));
 
 		juce::String buttonText = getButtonText();
 
@@ -67,8 +68,11 @@ namespace MyJUCEModules {
 
     // =====================================  PluginPanel  ================================================
 
-	PluginPanel::PluginPanel(PresetManager& pm, juce::RangedAudioParameter& gS, juce::UndoManager& uM) :
-		presetManager(pm), undoManager(uM), guiSize(dynamic_cast<juce::AudioParameterChoice&>(gS)), previousPresetButton("Previous", 0.5f, juce::Colours::gainsboro.darker().darker().darker().darker()),
+	// TODO: Remove guiSize from menu if guiSize wasn't provided.
+
+	PluginPanel::PluginPanel(PresetManager& pm, juce::UndoManager& uM, juce::AudioProcessorValueTreeState& apvts):
+		presetManager(pm), undoManager(uM), pluginApvts(apvts),
+		previousPresetButton("Previous", 0.5f, juce::Colours::gainsboro.darker().darker().darker().darker()),
 		nextPresetButton("Next", 1.0f, juce::Colours::gainsboro.darker().darker().darker().darker())
 	{
 		undoManager.addChangeListener(this);
@@ -82,6 +86,9 @@ namespace MyJUCEModules {
 
 		copyIcon = juce::Drawable::createFromImageData(BinaryData::filecopyline_svg, BinaryData::filecopyline_svgSize);
 		configureIconButton(copyButton, copyIcon->createCopy());
+
+		oversamplingIcon = juce::Drawable::createFromImageData(BinaryData::hqline_svg, BinaryData::hqline_svgSize);
+		configureIconButton(oversamplingButton, oversamplingIcon->createCopy());
 		
 		configureArrowButton(previousPresetButton);
 		configureComboBox(presetComboBox, "No preset");
@@ -112,8 +119,8 @@ namespace MyJUCEModules {
 		bypassButton.setColour(juce::DrawableButton::ColourIds::backgroundOnColourId, juce::Colours::gainsboro.darker());
 		bypassButton.setMouseCursor(juce::MouseCursor::PointingHandCursor);
 		addAndMakeVisible(bypassButton);
-		bypassButton.addListener(this);
 		bypassButton.setClickingTogglesState(true);
+		bypassAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(pluginApvts, g_bypassID, bypassButton);
 
 		const auto allPresets = presetManager.getAllPresets();
 		const auto currentPreset = presetManager.getCurrentPresetName();
@@ -205,7 +212,7 @@ namespace MyJUCEModules {
 		presetComboBox.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(10.1f * buttonHeight).reduced(0.08f * buttonHeight));
 		nextPresetButton.setBounds(presetComboBoxAndArrowsBounds.removeFromLeft(.7f * buttonHeight).reduced(0.23f * buttonHeight));
 
-		copyButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.05f * buttonHeight));
+		copyButton.setBounds(leftSideBounds.removeFromRight(1.f * buttonHeight).reduced(0.075f * buttonHeight));
 		
 		leftSideBounds.removeFromRight(2.f * buttonHeight);
 		
@@ -220,9 +227,13 @@ namespace MyJUCEModules {
 		aButton.setBounds(rightSideBounds.removeFromLeft(.75f * buttonHeight));
 		copyAtoBButton.setBounds(rightSideBounds.removeFromLeft(.6f * buttonHeight));
 		bButton.setBounds(rightSideBounds.removeFromLeft(.75f * buttonHeight));
+
+		rightSideBounds.removeFromLeft(3.f * buttonHeight);
+
+		oversamplingButton.setBounds(rightSideBounds.removeFromLeft(1.f * buttonHeight).reduced(0.075f * buttonHeight));
 		
 		rightSideBounds.removeFromRight(0.1f * buttonHeight);
-		bypassButton.setBounds(rightSideBounds.removeFromRight(buttonHeight).reduced(0.1f * buttonHeight));
+		bypassButton.setBounds(rightSideBounds.removeFromRight(buttonHeight).reduced(0.075f * buttonHeight));
 	}
 
 	void PluginPanel::buttonClicked(juce::Button* button) {
@@ -288,18 +299,32 @@ namespace MyJUCEModules {
 			});
 			m.addItem("Paste", [this] { presetManager.pastePreset(); });
 
-			m.addSeparator();
+			//m.addSeparator();
 			
-			juce::PopupMenu guiSizesMenu;
-			auto choices = guiSize.getAllValueStrings();
+			//juce::PopupMenu guiSizesMenu;
+			//auto choices = guiSize.getAllValueStrings();
 
+			//for (auto i = 0; i < choices.size(); i++) {
+			//	guiSizesMenu.addItem(choices[i], !(i == guiSize.getIndex()), (i == guiSize.getIndex()), [this, i] {
+			//		guiSize.operator=(i);
+			//	});
+			//}
+			//m.addSubMenu("GUI Size", guiSizesMenu);
+			m.showMenuAsync(juce::PopupMenu::Options{}.withTargetComponent(&optionsButton));
+			m.setLookAndFeel(nullptr);
+		}
+		else if (button == &oversamplingButton) {
+			juce::PopupMenu m;
+			auto oversampling = dynamic_cast<juce::AudioParameterChoice*>(pluginApvts.getParameter(g_osFactorID));
+			auto choices = oversampling->getAllValueStrings();
 			for (auto i = 0; i < choices.size(); i++) {
-				guiSizesMenu.addItem(choices[i], !(i == guiSize.getIndex()), (i == guiSize.getIndex()), [this, i] {
-					guiSize.operator=(i);
+				m.addItem((choices[i] == "x1" ? "No" : choices[i]) + " oversampling", !(i == oversampling->getIndex()), (i == oversampling->getIndex()), [this, i, oversampling] {
+					oversampling->operator=(i);
 				});
 			}
-			m.addSubMenu("GUI Size", guiSizesMenu);
-			m.showMenuAsync(juce::PopupMenu::Options{}.withTargetComponent(&optionsButton));
+			m.setLookAndFeel(&lookAndFeel);
+
+			m.showMenuAsync(juce::PopupMenu::Options{}.withTargetComponent(&oversamplingButton));
 			m.setLookAndFeel(nullptr);
 		}
 	}
