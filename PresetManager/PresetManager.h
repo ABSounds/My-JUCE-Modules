@@ -74,32 +74,26 @@ namespace MyJUCEModules {
 
 		void copyPreset() {
 			auto stateCopy = valueTreeState.copyState();
-
 			const auto xml = stateCopy.createXml();
 			xml->setAttribute("pluginName", JucePlugin_Name);
-			const auto clipBoardFile = defaultDirectory.getParentDirectory().getChildFile("Clipboard." + extension);
-			if (!xml->writeTo(clipBoardFile)) {
-				DBG("Failed to write preset: " + clipBoardFile.getFullPathName());
-				jassertfalse;
-			}
+			juce::SystemClipboard::copyTextToClipboard(xml->toString());			
+			DBG("Preste copied to clipboard");
 		}
 
 		void pastePreset() {
-			const auto clipboardFile = defaultDirectory.getParentDirectory().getChildFile("Clipboard." + extension);
-			if (!clipboardFile.exists()) {
-				DBG("Clipboard file does not exist: " + clipboardFile.getFullPathName());
-				jassertfalse;
-				return;
-			}
-			juce::XmlDocument xmlDocument{ clipboardFile };
-			auto xmlRoot = xmlDocument.getDocumentElement();
-			if (xmlRoot->getStringAttribute("pluginName") != JucePlugin_Name) {
-				DBG("Preset was not copied from this plugin");
-				return;
+			auto clipboardText = juce::SystemClipboard::getTextFromClipboard();
+			if (auto xml = juce::parseXML(clipboardText)) {
+				if (xml->getStringAttribute("pluginName") != JucePlugin_Name) {
+					DBG("Preset was not copied from this plugin");
+					return;
+				}
+				else {
+					auto valueTreeToLoad = juce::ValueTree::fromXml(*xml);
+					valueTreeState.replaceState(valueTreeToLoad);
+				}
 			}
 			else {
-				auto valueTreeToLoad = juce::ValueTree::fromXml(*xmlDocument.getDocumentElement());
-				valueTreeState.replaceState(valueTreeToLoad);
+				DBG("Clipboard content was not an XML file.");
 			}
 		}
 

@@ -243,7 +243,10 @@ namespace MyJUCEModules {
 		else if (button == &redoButton) {
 			undoManager.redo();
 		}
-		if (button == &previousPresetButton) {
+		else if (button == &copyButton) {
+			presetManager.copyPreset();
+		}
+		else if (button == &previousPresetButton) {
 			presetManager.loadPreviousPreset();
 			const auto allPresets = presetManager.getAllPresets();
 			const auto currentPreset = presetManager.getCurrentPresetName();
