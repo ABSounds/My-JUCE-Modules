@@ -300,7 +300,14 @@ namespace MyJUCEModules {
 					presetComboBox.setSelectedItemIndex(allPresets.indexOf(currentPreset), juce::dontSendNotification);
 				});
 			});
-			m.addItem("Paste", [this] { presetManager.pastePreset(); });
+			auto clipboardText = juce::SystemClipboard::getTextFromClipboard();
+			bool isValid = false;
+			if (auto xml = juce::parseXML(clipboardText)) {
+				if (xml->getStringAttribute("pluginName") == JucePlugin_Name) {
+					isValid = true;
+				}
+			}
+			m.addItem("Paste", isValid, false, [this] { presetManager.pastePreset(); });
 
 			//m.addSeparator();
 			
