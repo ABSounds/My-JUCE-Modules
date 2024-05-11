@@ -54,10 +54,13 @@ namespace MyJUCEModules {
 		g.setColour(colourToUse.withMultipliedAlpha(this->isEnabled() ? 1.0f : 0.5f));
 
 		juce::Font fontTouUSe = font;
-		if (isButtonDown || toggleState)
+		if (isButtonDown || toggleState){
 			fontTouUSe = font.boldened();
+			g.setFont(fontTouUSe.withHeight(getHeight() * 0.8f));
+		}
+		else
+			g.setFont(fontTouUSe.withHeight(getHeight() * 0.75f));
 		
-		g.setFont(fontTouUSe.withHeight(getHeight() * 0.75f));
 
 		juce::String buttonText = getButtonText();
 
@@ -67,8 +70,6 @@ namespace MyJUCEModules {
 
 
     // =====================================  PluginPanel  ================================================
-
-	// TODO: Remove guiSize from menu if guiSize wasn't provided.
 
 	PluginPanel::PluginPanel(PresetManager& pm, juce::UndoManager& uM, juce::AudioProcessorValueTreeState& apvts):
 		presetManager(pm), undoManager(uM), pluginApvts(apvts),
@@ -309,17 +310,6 @@ namespace MyJUCEModules {
 			}
 			m.addItem("Paste", isValid, false, [this] { presetManager.pastePreset(); });
 
-			//m.addSeparator();
-			
-			//juce::PopupMenu guiSizesMenu;
-			//auto choices = guiSize.getAllValueStrings();
-
-			//for (auto i = 0; i < choices.size(); i++) {
-			//	guiSizesMenu.addItem(choices[i], !(i == guiSize.getIndex()), (i == guiSize.getIndex()), [this, i] {
-			//		guiSize.operator=(i);
-			//	});
-			//}
-			//m.addSubMenu("GUI Size", guiSizesMenu);
 			m.showMenuAsync(juce::PopupMenu::Options{}.withTargetComponent(&optionsButton));
 			m.setLookAndFeel(nullptr);
 		}
