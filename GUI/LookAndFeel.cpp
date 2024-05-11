@@ -16,6 +16,9 @@ namespace MyJUCEModules {
         setColour(juce::PopupMenu::ColourIds::textColourId, baseTextColour);
         setColour(juce::PopupMenu::ColourIds::highlightedTextColourId, baseTextColour.darker());
         setColour(juce::PopupMenu::ColourIds::headerTextColourId, baseTextColour);
+        setColour(juce::TooltipWindow::ColourIds::backgroundColourId, juce::Colours::gainsboro.darker());
+        setColour(juce::TooltipWindow::ColourIds::textColourId, baseTextColour);
+        setColour(juce::TooltipWindow::ColourIds::outlineColourId, juce::Colours::gainsboro.darker().darker().darker());
     }
     
     juce::Font PluginPanelLookAndFeel::getComboBoxFont(juce::ComboBox& box) {

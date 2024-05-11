@@ -85,9 +85,7 @@ namespace MyJUCEModules {
         PresetManager& presetManager;
         juce::UndoManager& undoManager;
         juce::AudioProcessorValueTreeState& pluginApvts;
-        
-        //juce::AudioParameterBool& bypass;
-        //juce::AudioParameterChoice& oversampling, &guiSize;
+        SharedResourcePointer<TooltipWindow> tooltipWindow;
         
         juce::String pluginName = "  " + juce::String(JucePlugin_Name) + " ";
         juce::String pluginVersion = " v" + juce::String(JucePlugin_VersionString);

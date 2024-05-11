@@ -56,7 +56,7 @@ namespace MyJUCEModules {
 		juce::Font fontTouUSe = font;
 		if (isButtonDown || toggleState){
 			fontTouUSe = font.boldened();
-			g.setFont(fontTouUSe.withHeight(getHeight() * 0.8f));
+			g.setFont(fontTouUSe.withHeight(getHeight() * 0.78f));
 		}
 		else
 			g.setFont(fontTouUSe.withHeight(getHeight() * 0.75f));
@@ -77,33 +77,45 @@ namespace MyJUCEModules {
 		nextPresetButton("Next", 1.0f, juce::Colours::gainsboro.darker().darker().darker().darker())
 	{
 		undoManager.addChangeListener(this);
+		tooltipWindow->setLookAndFeel(&lookAndFeel);
 
 		undoIcon = juce::Drawable::createFromImageData(BinaryData::arrowgobackline_svg, BinaryData::arrowgobackline_svgSize);
 		configureIconButton(undoButton, undoIcon->createCopy());
+		undoButton.setTooltip("Undo");
 		undoButton.setEnabled(false);
 		redoIcon = juce::Drawable::createFromImageData(BinaryData::arrowgoforwardline_svg, BinaryData::arrowgobackline_svgSize);
 		configureIconButton(redoButton, redoIcon->createCopy());
 		redoButton.setEnabled(false);
+		redoButton.setTooltip("Redo");
 
 		copyIcon = juce::Drawable::createFromImageData(BinaryData::filecopyline_svg, BinaryData::filecopyline_svgSize);
 		configureIconButton(copyButton, copyIcon->createCopy());
+		copyButton.setTooltip("Copy current configuration to clipboard");
 
 		oversamplingIcon = juce::Drawable::createFromImageData(BinaryData::hqline_svg, BinaryData::hqline_svgSize);
 		configureIconButton(oversamplingButton, oversamplingIcon->createCopy());
+		oversamplingButton.setTooltip("Configure oversampling");
 		
 		configureArrowButton(previousPresetButton);
+		previousPresetButton.setTooltip("Previous preset");
 		configureComboBox(presetComboBox, "No preset");
+		presetComboBox.setTooltip("Select a preset");
 		configureArrowButton(nextPresetButton);
+		nextPresetButton.setTooltip("Next preset");
 		
 		optionsIcon = juce::Drawable::createFromImageData(BinaryData::menuline_svg, BinaryData::menuline_svgSize);
 		configureIconButton(optionsButton, optionsIcon->createCopy());
+		optionsButton.setTooltip("More...");
 		
 		configureTextButton(aButton, "A");
 		aButton.setClickingTogglesState(true);
 		aButton.setToggleState(true, juce::dontSendNotification);
+		aButton.setTooltip("Switch to configuration A");
 		configureTextButton(copyAtoBButton, ">");
+		copyAtoBButton.setTooltip("Copy current configuration to B");
 		configureTextButton(bButton, "B");
 		bButton.setClickingTogglesState(true);
+		bButton.setTooltip("Switch to configuration B");
 		
 		bypassIcon= juce::Drawable::createFromImageData(BinaryData::shutdownline_svg, BinaryData::shutdownline_svgSize);
 		
@@ -121,6 +133,7 @@ namespace MyJUCEModules {
 		bypassButton.setMouseCursor(juce::MouseCursor::PointingHandCursor);
 		addAndMakeVisible(bypassButton);
 		bypassButton.setClickingTogglesState(true);
+		bypassButton.setTooltip("Toggle plugin bypass");
 		bypassAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(pluginApvts, g_bypassID, bypassButton);
 
 		const auto allPresets = presetManager.getAllPresets();
@@ -133,6 +146,8 @@ namespace MyJUCEModules {
 	}
 
 	PluginPanel::~PluginPanel() {
+		tooltipWindow->setLookAndFeel(nullptr);
+
 		undoButton.removeListener(this);
 		undoButton.setLookAndFeel(nullptr);
 
@@ -264,12 +279,14 @@ namespace MyJUCEModules {
 			bButton.setToggleState(false, juce::dontSendNotification);
 			aButton.setToggleState(true, juce::dontSendNotification);
 			copyAtoBButton.setButtonText(">");
+			copyAtoBButton.setTooltip("Copy current configuration to B");
 		}
 		else if (button == &bButton) {
 			presetManager.switchToConfig("B");
 			bButton.setToggleState(true, juce::dontSendNotification);
 			aButton.setToggleState(false, juce::dontSendNotification);
 			copyAtoBButton.setButtonText("<");
+			copyAtoBButton.setTooltip("Copy current configuration to A");
 		}
 		else if (button == &copyAtoBButton) {
 			presetManager.copyCurrentConfigToOther();
