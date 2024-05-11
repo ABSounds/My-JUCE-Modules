@@ -1,13 +1,3 @@
-/*
-  ==============================================================================
-
-    DualKnobComponent.h
-    Created: 8 Jul 2022 1:18:17pm
-    Author:  Estudio
-
-  ==============================================================================
-*/
-
 #pragma once
 #include "JuceHeader.h"
 #include "LookAndFeel.h"
