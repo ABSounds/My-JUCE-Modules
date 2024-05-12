@@ -35,6 +35,7 @@ namespace MyJUCEModules {
 	}
 
 	// =====================================  MyTextButton  ================================================
+
 	void MyTextButton::paintButton(juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) {
 		juce::Colour colourToUse = colour;
 		auto toggleState = getToggleState();

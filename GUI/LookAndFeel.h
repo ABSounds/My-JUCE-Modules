@@ -6,6 +6,9 @@
 /*
 */
 namespace MyJUCEModules {
+    /**
+    *   @brief Custom LookAndFeel used for the PluginPanel component.
+    **/
     class PluginPanelLookAndFeel : public juce::LookAndFeel_V4
     {
     public:

@@ -3,11 +3,19 @@
 #include "JuceHeader.h"
 
 namespace MyJUCEModules {
+	/**
+	*   @brief Preset manager class to manage the presets of the plugin and A/B states.
+	**/
 	class PresetManager {
 	public:
 		const juce::File defaultDirectory;
 		const juce::String extension{ "preset" };
 
+		/**
+		*   @brief Preset manager class to manage the presets of the plugin and A/B states.
+		*	@param apvts Reference to the plugin's AudioProcessorValueTreeState to be affected by the preset manager.
+		*	@param dd Default directory to save and load presets from.
+		**/
 		PresetManager(juce::AudioProcessorValueTreeState& apvts, juce::File dd) : defaultDirectory(dd), valueTreeState(apvts)
 		{
 			otherValueTree = valueTreeState.copyState();

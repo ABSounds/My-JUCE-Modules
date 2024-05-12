@@ -31,7 +31,7 @@ namespace MyJUCEModules {
 
     // ====================== MY TEXT BUTTON ======================
     /**
-    *
+    *   @brief Text button with custom paint method.
     **/
     class MyTextButton : public juce::TextButton
 	{
@@ -54,10 +54,10 @@ namespace MyJUCEModules {
     public:
         /**
         *   @param presetManager Reference to the plugin's PresetManager object.
-        *   @param guiSize Reference to the plugin's guiSize parameter.
         *   @param undoManager Reference to the plugin's UndoManager object.
+        *   @param apvts Reference to the plugin's AudioProcessorValueTreeState to be affected by the undoManager.
         **/
-        PluginPanel(PresetManager& pm, juce::UndoManager& uM, juce::AudioProcessorValueTreeState& apvts);
+        PluginPanel(PresetManager& presetManager, juce::UndoManager& undoManager, juce::AudioProcessorValueTreeState& apvts);
         ~PluginPanel();
         void paint(juce::Graphics& g) override;
         void resized() override;
@@ -102,5 +102,4 @@ namespace MyJUCEModules {
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginPanel)
     };
-
 }
