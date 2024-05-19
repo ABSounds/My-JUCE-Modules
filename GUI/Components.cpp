@@ -48,7 +48,7 @@ namespace MyJUCEModules {
 		juce::Font fontTouUSe = font;
 		if (isButtonDown || toggleState){
 			fontTouUSe = font.boldened();
-			g.setFont(fontTouUSe.withHeight(getHeight() * 0.78f));
+			g.setFont(fontTouUSe.withHeight(getHeight() * 0.75f));
 		}
 		else
 			g.setFont(fontTouUSe.withHeight(getHeight() * 0.75f));
@@ -176,7 +176,7 @@ namespace MyJUCEModules {
 		g.setColour(textBaseColour);
 		auto bounds = getLocalBounds();
 
-		juce::Font f1 { bounds.getHeight() * 0.6f};
+		juce::Font f1 = font.withHeight(bounds.getHeight() * 0.6f);
 		auto pluginNameBounds = bounds.removeFromLeft(f1.getStringWidth(pluginName));
 		g.setFont(f1);
 		g.drawText(pluginName, pluginNameBounds, juce::Justification::left);
@@ -363,6 +363,7 @@ namespace MyJUCEModules {
 	void PluginPanel::configureTextButton(MyJUCEModules::MyTextButton& button, const juce::String& buttonText) {
 		button.setButtonText(buttonText);
 		button.setMouseCursor(juce::MouseCursor::PointingHandCursor);
+		button.setFont(font);
 		addAndMakeVisible(button);
 		button.addListener(this);
 	}
