@@ -41,7 +41,7 @@ namespace MyJUCEModules {
         void setFont(juce::Font font) { this->font = font; }
         void setColour(juce::Colour colour) { this->colour = colour; }
     private:
-        juce::Font font = juce::Font(juce::String("Calibri"), 11.0f, juce::Font::FontStyleFlags::plain);
+        juce::Font font;
         juce::Colour colour = juce::Colours::gainsboro.darker().darker().darker().darker();
     };
 
@@ -77,6 +77,7 @@ namespace MyJUCEModules {
         juce::AudioProcessorValueTreeState& pluginApvts;
         SharedResourcePointer<TooltipWindow> tooltipWindow;
         
+        juce::Font font = juce::Font(juce::String("Tahoma"), 11.0f, juce::Font::FontStyleFlags::plain);
         juce::String pluginName = "  " + juce::String(JucePlugin_Name) + " ";
         juce::String pluginVersion = " v" + juce::String(JucePlugin_VersionString);
 
