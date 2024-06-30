@@ -48,10 +48,10 @@ namespace MyJUCEModules {
 		juce::Font fontTouUSe = font;
 		if (isButtonDown || toggleState){
 			fontTouUSe = font.boldened();
-			g.setFont(fontTouUSe.withHeight(getHeight() * 0.75f));
+			g.setFont(fontTouUSe.withHeight(getHeight() * 0.7f));
 		}
 		else
-			g.setFont(fontTouUSe.withHeight(getHeight() * 0.75f));
+			g.setFont(fontTouUSe.withHeight(getHeight() * 0.7f));
 		
 
 		juce::String buttonText = getButtonText();
@@ -138,6 +138,8 @@ namespace MyJUCEModules {
 	}
 
 	PluginPanel::~PluginPanel() {
+		undoManager.removeChangeListener(this);
+
 		tooltipWindow->setLookAndFeel(nullptr);
 
 		undoButton.removeListener(this);
