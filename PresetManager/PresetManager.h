@@ -85,7 +85,7 @@ namespace MyJUCEModules {
 			const auto xml = stateCopy.createXml();
 			xml->setAttribute("pluginName", JucePlugin_Name);
 			juce::SystemClipboard::copyTextToClipboard(xml->toString());			
-			DBG("Preste copied to clipboard");
+			DBG("Preset copied to clipboard");
 		}
 
 		void pastePreset() {
