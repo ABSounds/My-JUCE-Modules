@@ -1,40 +1,35 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include <algorithm>
 
 namespace MyJUCEModules {
-    // Things I want in the Meter:
-    // - Mono/Stereo compatibility
-    // - RMS with configurable window size
-    // - Clip indicator
 
     class MeterSource
     {
     public:
         MeterSource() {
-            spec = {44'100.0, 512, 1};
-            numSamplesToIntegrate = 512;
-            rms = 0.f;
-            clip = false;
+			integrationTimeMs = 100;
         }
 
         ~MeterSource() {
             internalBuffer.clear();
         }
 
-        prepare(juce::dsp::ProcessSpec spec) {
+        void prepare(juce::dsp::ProcessSpec spec) {
             this->spec = spec;
 
-            numSamplesToIntegrate = static_cast<size_t>(timeMs * spec.sampleRate / 1000.0);
+            numSamplesToIntegrate = static_cast<size_t>(integrationTimeMs * spec.sampleRate / 1000.0);
             internalBuffer.setSize((int)spec.numChannels, (int)numSamplesToIntegrate);
             internalBuffer.clear();
         }
 
-        setIntegrationTime(int timeMs) {
-            numSamplesToIntegrate = timeMs * spec.sampleRate / 1000;
+        void setIntegrationTime(int timeMs) {
+			integrationTimeMs = timeMs;
+            numSamplesToIntegrate = integrationTimeMs * spec.sampleRate / 1000;
         }
 
-        measureBlock(const juce::AudioBuffer<float>& buffer) {
+        void measureBlock(const juce::AudioBuffer<float>& buffer) {
             int numSamples = buffer.getNumSamples();
             int numChannels = buffer.getNumChannels();
 
@@ -60,15 +55,15 @@ namespace MyJUCEModules {
                     // CHECK ranges here
                     std::copy(incomingData, incomingData + numSamples, internalData + numSamplesToIntegrate);
                     
-                    rmsLevels[channel] = rmsBuffer.getRMSLevel(channel, 0, numSamplesToIntegrate);
-                    clips[channel] = rmsBuffer.getMagnitude(channel, 0, numSamplesToIntegrate) > 1.0f;
+                    rmsLevels[channel] = internalBuffer.getRMSLevel(channel, 0, numSamplesToIntegrate);
+                    clips[channel] = internalBuffer.getMagnitude(channel, 0, numSamplesToIntegrate) > 1.0f;
 
                     // It would be nice to send a message to the GUI thread here if the clip status has changed
                 }
             }
         }
 
-        getNumChannels() const {
+        int getNumChannels() const {
             return internalBuffer.getNumChannels();
         }
 
@@ -81,10 +76,11 @@ namespace MyJUCEModules {
         }
 
     private:
-        juce::dsp::ProcessSpec              spec;
-        size_t                              numSamplesToIntegrate;
-        juce::AudioBuffer<float>            internalBuffer;
-        std::vector<float>                  rmsLevels;
-        std::vector<bool>                   clips;
+        juce::dsp::ProcessSpec      spec;
+		size_t                      integrationTimeMs;
+        size_t                      numSamplesToIntegrate;
+        juce::AudioBuffer<float>    internalBuffer;
+        std::vector<float>          rmsLevels;
+        std::vector<bool>           clips;
     };
 }

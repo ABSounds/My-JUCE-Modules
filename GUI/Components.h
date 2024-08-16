@@ -106,13 +106,14 @@ namespace MyJUCEModules {
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginPanel)
     };
 
-    // ====================== METER COMPONENT ======================
+    // ====================== LEVEL METER COMPONENT ======================
     /**
     *   @brief Meter component that displays the level of an audio buffer.
     **/
     class LevelMeter : public juce::Component
     {
     public:
+
         enum Orientation{
             Vertical,
             Horizontal,
@@ -133,16 +134,19 @@ namespace MyJUCEModules {
         *   @param orientation Orientation of the meter.
         *   @param showClipIndicator Whether to show the clip indicator.
         **/
-        LevelMeter(MeterSource& source, float minDb, float maxDb, Meter::Orientation orientation, bool showClipIndicator);
+        LevelMeter(MeterSource& source, float minDb, float maxDb, MeterColours colours, bool showClipIndicator);
         void resized() override;
         void update();
 
     private:
+        class MeterBar;
+        class ClipIndicator;
+
         MeterSource& meterSource;
         float minDb, maxDb;
-        juce::Value<bool> clipped = false;
+        bool clipped = false;
 
-        Orientation setupOrientation;
+        Orientation setupOrientation = Orientation::Free;
         Orientation orientationToUse;
 
         bool showClipIndicator;
@@ -154,7 +158,7 @@ namespace MyJUCEModules {
         class MeterBar : public juce::Component
         {
         public:
-            MeterBar(LevelMeter::MeterColours colours, Orientation orientation, warningThreshold = 1.0f, float clipThreshold = 1.0f);
+            MeterBar(Orientation orientation, float warningThreshold = 1.0f, float clipThreshold = 1.0f);
             ~MeterBar();
             void setOrientation(Orientation orientation);
             void setColours(LevelMeter::MeterColours colours);
@@ -175,7 +179,7 @@ namespace MyJUCEModules {
         class ClipIndicator : public juce::Component, juce::MouseListener
         {
         public:
-            ClipIndicator(juce::Colour colour);
+            ClipIndicator();
             ~ClipIndicator();
             void paint(juce::Graphics& g) override;
             void setClipped(bool clipped);
