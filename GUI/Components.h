@@ -1,17 +1,9 @@
-/*
-  ==============================================================================
-
-    DualKnobComponent.h
-    Created: 8 Jul 2022 1:18:17pm
-    Author:  Estudio
-
-  ==============================================================================
-*/
-
 #pragma once
+
 #include "JuceHeader.h"
 #include "LookAndFeel.h"
 #include "../PresetManager/PresetManager.h"
+#include "../DSP/MeterSource.h"
 
 namespace MyJUCEModules {
 
@@ -92,6 +84,90 @@ namespace MyJUCEModules {
         PluginPanelLookAndFeel lookAndFeel;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginPanel)
+    };
+
+    // ====================== METER COMPONENT ======================
+    /**
+    *   @brief Meter component that displays the level of an audio buffer.
+    **/
+    class LevelMeter : public juce::Component
+    {
+    public:
+        enum Orientation{
+            Vertical,
+            Horizontal,
+            Free // Adapts the orientation depending on the aspect ratio of the component
+        };
+
+        struct MeterColours {
+            juce::Colour backgroundColour;
+            juce::Colour fillColour;
+            juce::Colour warningColour;
+            juce::Colour clipColour;
+        };
+
+        /**
+        *   @param source Reference to the MeterSource object to use for the meter.
+        *   @param minDb Minimum value in dB.
+        *   @param maxDb Maximum value in dB.
+        *   @param orientation Orientation of the meter.
+        *   @param showClipIndicator Whether to show the clip indicator.
+        **/
+        LevelMeter(MeterSource& source, float minDb, float maxDb, Meter::Orientation orientation, bool showClipIndicator);
+        void resized() override;
+        void update();
+
+    private:
+        MeterSource& meterSource;
+        float minDb, maxDb;
+        juce::Value<bool> clipped = false;
+
+        Orientation setupOrientation;
+        Orientation orientationToUse;
+
+        bool showClipIndicator;
+        size_t numChannels = 1;
+
+        juce::OwnedArray<MeterBar> meterBars;
+        juce::OwnedArray<ClipIndicator> clipIndicators;
+
+        class MeterBar : public juce::Component
+        {
+        public:
+            MeterBar(LevelMeter::MeterColours colours, Orientation orientation, warningThreshold = 1.0f, float clipThreshold = 1.0f);
+            ~MeterBar();
+            void setOrientation(Orientation orientation);
+            void setColours(LevelMeter::MeterColours colours);
+            void setRanges(float warningThreshold, float clipThreshold);
+            void setBarFill(float fillAmount);
+            void paint(juce::Graphics& g) override;
+        private:
+            float fill = 0.0f;
+            float warningThreshold;
+            float clipThreshold;
+
+            LevelMeter::MeterColours colours;
+            Orientation orientation;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MeterBar)
+        };
+
+        class ClipIndicator : public juce::Component, juce::MouseListener
+        {
+        public:
+            ClipIndicator(juce::Colour colour);
+            ~ClipIndicator();
+            void paint(juce::Graphics& g) override;
+            void setClipped(bool clipped);
+            void mouseDown (const MouseEvent &event) override;
+        private:
+            juce::Colour colour;
+            bool clipped = false;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClipIndicator)
+        };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LevelMeter)
     };
 
 }
