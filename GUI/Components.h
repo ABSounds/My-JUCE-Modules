@@ -121,35 +121,40 @@ namespace MyJUCEModules {
         };
 
         struct MeterColours {
-            juce::Colour backgroundColour;
-            juce::Colour fillColour;
-            juce::Colour warningColour;
-            juce::Colour clipColour;
+            juce::Colour backgroundColour   = juce::Colours::darkgrey;
+			juce::Colour normalColour       = juce::Colours::whitesmoke;
+            juce::Colour warningColour      = juce::Colours::darkolivegreen;
+            juce::Colour clipColour         = juce::Colours::orangered;
+        };
+
+        struct MeterSpecs {
+			float           dBmin               = -60.0f;
+			float           dBmax               = 6.0f;
+			float           warningThreshold    = -6.0f;
+			float           clipThreshold       = 0.0f;
+			bool            showClipIndicator   = true;
+			Orientation     orientation         = Orientation::Free;
         };
 
         /**
         *   @param source Reference to the MeterSource object to use for the meter.
-        *   @param minDb Minimum value in dB.
-        *   @param maxDb Maximum value in dB.
-        *   @param orientation Orientation of the meter.
-        *   @param showClipIndicator Whether to show the clip indicator.
+		*   @param meterSpecs MeterSpecs struct containing the settings to use for the meter.
         **/
-        LevelMeter(MeterSource& source, float minDb, float maxDb, MeterColours colours, bool showClipIndicator);
+        LevelMeter(MeterSource& source, MeterSpecs meterSpecs);
         void resized() override;
         void update();
+		void setColours(MeterColours colours);
 
     private:
         class MeterBar;
         class ClipIndicator;
 
         MeterSource& meterSource;
-        float minDb, maxDb;
-        bool clipped = false;
+		MeterSpecs meterSpecs;
+		MeterColours colours;
 
-        Orientation setupOrientation = Orientation::Free;
-        Orientation orientationToUse;
+        Orientation orientationToUse = Orientation::Vertical;
 
-        bool showClipIndicator;
         size_t numChannels = 1;
 
         juce::OwnedArray<MeterBar> meterBars;
@@ -158,31 +163,32 @@ namespace MyJUCEModules {
         class MeterBar : public juce::Component
         {
         public:
-            MeterBar(Orientation orientation, float warningThreshold = 1.0f, float clipThreshold = 1.0f);
+            MeterBar(MeterSpecs meterSpecs);
             ~MeterBar();
             void setOrientation(Orientation orientation);
             void setColours(LevelMeter::MeterColours colours);
-            void setRanges(float warningThreshold, float clipThreshold);
+			void setSpecs(LevelMeter::MeterSpecs meterSpecs);
             void setBarFill(float fillAmount);
             void paint(juce::Graphics& g) override;
         private:
             float fill = 0.0f;
-            float warningThreshold;
-            float clipThreshold;
+			float warningThresholdLinear = 1.0f;
+			float clipThresholdLinear = 1.0f;
 
-            LevelMeter::MeterColours colours;
-            Orientation orientation;
+            MeterColours colours;
+            MeterSpecs meterSpecs;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MeterBar)
         };
 
-        class ClipIndicator : public juce::Component, juce::MouseListener
+		class ClipIndicator : public juce::Component, juce::MouseListener//, juce::ChangeListener
         {
         public:
-            ClipIndicator();
+            ClipIndicator(juce::Colour colour);
             ~ClipIndicator();
             void paint(juce::Graphics& g) override;
             void setClipped(bool clipped);
+			void setColour(juce::Colour colour);
             void mouseDown (const MouseEvent &event) override;
         private:
             juce::Colour colour;

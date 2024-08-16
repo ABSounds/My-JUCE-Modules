@@ -10,6 +10,10 @@ namespace MyJUCEModules {
     public:
         MeterSource() {
 			integrationTimeMs = 100;
+			rmsLevels.resize(1);
+            rmsLevels[0] = 3.f;
+			clips.resize(1);
+            internalBuffer.setSize(1, 512);
         }
 
         ~MeterSource() {
@@ -22,6 +26,11 @@ namespace MyJUCEModules {
             numSamplesToIntegrate = static_cast<size_t>(integrationTimeMs * spec.sampleRate / 1000.0);
             internalBuffer.setSize((int)spec.numChannels, (int)numSamplesToIntegrate);
             internalBuffer.clear();
+
+			rmsLevels.resize(spec.numChannels);
+			clips.resize(spec.numChannels);
+
+            rmsLevels[0] = 0.6f;
         }
 
         void setIntegrationTime(int timeMs) {

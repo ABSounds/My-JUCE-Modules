@@ -398,19 +398,18 @@ namespace MyJUCEModules {
 
 	// =====================================  LEVEL METER COMPONENT ================================================
 	
-	LevelMeter::LevelMeter(MeterSource& source, float minDb, float maxDb, LevelMeter::MeterColours colours, bool showClipIndicator) : meterSource(source), minDb(minDb), maxDb(maxDb), showClipIndicator(showClipIndicator)
+	LevelMeter::LevelMeter(MeterSource& source, MeterSpecs meterSpecs = MeterSpecs()) : meterSource(source), meterSpecs(meterSpecs)
 	{
 		auto numChannels = meterSource.getNumChannels();
-
-		setupOrientation = Orientation::Free;
-		orientationToUse = Orientation::Vertical;
 		
+		jassert(numChannels > 0);
+
 		for (auto i = 0; i < numChannels; i++) {
-			meterBars.add(new MeterBar(Orientation::Free));
+			meterBars.add(new MeterBar(meterSpecs));
 			addAndMakeVisible(meterBars.getLast());
 			
-			clipIndicators.add(new ClipIndicator());
-			if (showClipIndicator) {
+			clipIndicators.add(new ClipIndicator(colours.clipColour));
+			if (meterSpecs.showClipIndicator) {
 				addAndMakeVisible(clipIndicators.getLast());
 			}
 		}
@@ -418,41 +417,42 @@ namespace MyJUCEModules {
     
 	void LevelMeter::resized() {
 		auto bounds = getLocalBounds();
-		orientationToUse = setupOrientation == Free ? bounds.getWidth() > bounds.getHeight() ? Horizontal : Vertical : setupOrientation;
 
-		auto clipIndicatorProportion = showClipIndicator ? 0.1f : 0.0f;
-		auto numChannels = meterSource.getNumChannels();
+		auto clipIndicatorProportion = meterSpecs.showClipIndicator ? 0.1f : 0.0f;
 
+		orientationToUse = meterSpecs.orientation == Free ? bounds.getWidth() > bounds.getHeight() ? Horizontal : Vertical : meterSpecs.orientation;
+
+		jassert(meterBars.size() > 0);
 		switch (orientationToUse) {
 			case Vertical:
 			{
 				auto meterWidth = bounds.getWidth() / meterBars.size();
-				for (auto i = 0; i < numChannels; i++) {
-					auto meterBar = meterBars[i];
-					auto clipIndicator = clipIndicators[i];
+				for (auto ch = 0; ch < numChannels; ch++) {
+					auto meterBar = meterBars[ch];
+					auto clipIndicator = clipIndicators[ch];
 					auto meterBarBounds = bounds.removeFromLeft(meterWidth);
-					if (showClipIndicator) {
+					if (meterSpecs.showClipIndicator) {
 						clipIndicator->setBounds(meterBarBounds.removeFromTop(meterBarBounds.getHeight() * clipIndicatorProportion));
 					}
+					meterBar->setOrientation(orientationToUse);
 					meterBar->setBounds(meterBarBounds);
 				}
 				break;
 			}
-
 			case Horizontal:
 			{
 				auto meterHeight = bounds.getHeight() / meterBars.size();
-				for (auto i = 0; i < numChannels; i++) {
-					auto meterBar = meterBars[i];
-					auto clipIndicator = clipIndicators[i];
+				for (auto ch = 0; ch < numChannels; ch++) {
+					auto meterBar = meterBars[ch];
+					auto clipIndicator = clipIndicators[ch];
 					auto meterBarBounds = bounds.removeFromTop(meterHeight);
-					if (showClipIndicator)
+					if (meterSpecs.showClipIndicator)
 					{
 						clipIndicator->setBounds(meterBarBounds.removeFromRight(meterBarBounds.getWidth() * clipIndicatorProportion));
 					}
+					meterBar->setOrientation(orientationToUse);
 					meterBar->setBounds(meterBarBounds);
 				}
-
 				break;
 			}
 		}
@@ -461,24 +461,34 @@ namespace MyJUCEModules {
 	void LevelMeter::update() {
 		auto numChannels = meterSource.getNumChannels();
 
-		for (auto i = 0; i < numChannels; i++) {
-			auto rms = meterSource.getRMS(i);
-			auto meterBar = meterBars[i];
-			auto clipIndicator = clipIndicators[i];
-			meterBar->setBarFill(juce::jmap(rms, minDb, maxDb, 0.0f, 1.0f));
+		for (auto channel = 0; channel < numChannels; channel++) {
+			auto dBLevel = juce::Decibels::gainToDecibels(meterSource.getRMS(channel), meterSpecs.dBmin);
+			auto meterBar = meterBars[channel];
+			meterBar->setBarFill(jlimit(0.f, 1.0f, jmap(dBLevel, meterSpecs.dBmin, meterSpecs.dBmax, 0.0f, 1.0f)));
 		}
+
+		repaint();
+	}
+
+	void LevelMeter::setColours(MeterColours colours) {
+		
+		for (auto i = 0; i < meterBars.size(); i++) {
+			meterBars[i]->setColours(colours);
+		}
+
+		repaint();
 	}
 
 	// =====================================  MeterBar  ================================================
 	
-	LevelMeter::MeterBar::MeterBar(Orientation Orientation, float warningThreshold, float clipThreshold) : colours(colours), orientation(orientation) {
-		setRanges(warningThreshold, clipThreshold);
+	LevelMeter::MeterBar::MeterBar(MeterSpecs meterSpecs) {
+		setSpecs(meterSpecs);
 	}
 
 	LevelMeter::MeterBar::~MeterBar() {}
 
 	void LevelMeter::MeterBar::setOrientation(Orientation orientation) {
-		this->orientation = orientation;
+		meterSpecs.orientation = orientation;
 		repaint();
 	}
 
@@ -487,9 +497,11 @@ namespace MyJUCEModules {
 		repaint();
 	}
 
-	void LevelMeter::MeterBar::setRanges(float warningThreshold, float clipThreshold) {
-		this->warningThreshold = warningThreshold;
-		this->clipThreshold = clipThreshold;
+	void LevelMeter::MeterBar::setSpecs(MeterSpecs meterSpecs) {
+		this->meterSpecs = meterSpecs;
+		warningThresholdLinear = jmap(meterSpecs.warningThreshold, meterSpecs.dBmin, meterSpecs.dBmax, 0.0f, 1.0f);
+		clipThresholdLinear = jmap(meterSpecs.clipThreshold, meterSpecs.dBmin, meterSpecs.dBmax, 0.0f, 1.0f);
+		repaint();
 	}
 
 	void LevelMeter::MeterBar::setBarFill(float fillAmount) {
@@ -503,24 +515,24 @@ namespace MyJUCEModules {
 
 		juce::Rectangle<int> normalBounds, warningBounds, clipBounds;
 
-		switch (orientation) {
+		switch (meterSpecs.orientation) {
 		case Vertical:
 			fillBounds.removeFromTop(fillBounds.getHeight() * (1.0f - fill));
-			normalBounds = fillBounds.removeFromBottom(fillBounds.getHeight() * warningThreshold);
-			warningBounds = fillBounds.removeFromBottom(fillBounds.getHeight() * (clipThreshold - warningThreshold));
+			normalBounds = fillBounds.removeFromBottom(bounds.getHeight() * warningThresholdLinear);
+			warningBounds = fillBounds.removeFromBottom(bounds.getHeight() * (clipThresholdLinear - warningThresholdLinear));
 			clipBounds = fillBounds;
 			break;
 		case Horizontal:
 			fillBounds.removeFromRight(fillBounds.getWidth() * (1.0f - fill));
-			normalBounds = fillBounds.removeFromLeft(fillBounds.getWidth() * warningThreshold);
-			warningBounds = fillBounds.removeFromLeft(fillBounds.getWidth() * (clipThreshold - warningThreshold));
+			normalBounds = fillBounds.removeFromLeft(bounds.getWidth() * warningThresholdLinear);
+			warningBounds = fillBounds.removeFromLeft(bounds.getWidth() * (clipThresholdLinear - warningThresholdLinear));
 			clipBounds = fillBounds;
 			break;
 		}
 
 		g.setColour(colours.backgroundColour);
 		g.fillRect(bounds);
-		g.setColour(colours.fillColour);
+		g.setColour(colours.normalColour);
 		g.fillRect(normalBounds);
 		g.setColour(colours.warningColour);
 		g.fillRect(warningBounds);
@@ -530,9 +542,9 @@ namespace MyJUCEModules {
 
 	// =====================================  ClipIndicator  ================================================
 
-	LevelMeter::ClipIndicator::ClipIndicator() {}
+	LevelMeter::ClipIndicator::ClipIndicator(juce::Colour colour) : colour(colour) { }
 
-	LevelMeter::ClipIndicator::~ClipIndicator() {}
+	LevelMeter::ClipIndicator::~ClipIndicator() { }
 
 	void LevelMeter::ClipIndicator::paint(juce::Graphics& g) {
 		auto bounds = getLocalBounds();
@@ -542,6 +554,11 @@ namespace MyJUCEModules {
 
 	void LevelMeter::ClipIndicator::setClipped(bool clipped) {
 		setVisible(clipped);
+	}
+
+	void LevelMeter::ClipIndicator::setColour(juce::Colour colour) {
+		this->colour = colour;
+		repaint();
 	}
 
 	void LevelMeter::ClipIndicator::mouseDown(const MouseEvent& event) {
