@@ -421,12 +421,14 @@ namespace MyJUCEModules {
 		auto clipIndicatorProportion = meterSpecs.showClipIndicator ? 0.1f : 0.0f;
 
 		orientationToUse = meterSpecs.orientation == Free ? bounds.getWidth() > bounds.getHeight() ? Horizontal : Vertical : meterSpecs.orientation;
+		numChannels = meterBars.size();
 
-		jassert(meterBars.size() > 0);
+		jassert(numChannels > 0);
+		
 		switch (orientationToUse) {
 			case Vertical:
 			{
-				auto meterWidth = bounds.getWidth() / meterBars.size();
+				auto meterWidth = bounds.getWidth() / numChannels;
 				for (auto ch = 0; ch < numChannels; ch++) {
 					auto meterBar = meterBars[ch];
 					auto clipIndicator = clipIndicators[ch];
@@ -568,5 +570,4 @@ namespace MyJUCEModules {
 	void LevelMeter::ClipIndicator::mouseDown(const MouseEvent& event) {
 		setClipped(false);
 	}
-
 }
