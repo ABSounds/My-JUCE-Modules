@@ -123,14 +123,14 @@ namespace MyJUCEModules {
         struct MeterColours {
             juce::Colour backgroundColour   = juce::Colours::darkgrey;
 			juce::Colour normalColour       = juce::Colours::whitesmoke;
-            juce::Colour warningColour      = juce::Colours::darkolivegreen;
-            juce::Colour clipColour         = juce::Colours::orangered;
+            juce::Colour warningColour      = juce::Colours::orange;
+            juce::Colour clipColour         = juce::Colours::red;
         };
 
         struct MeterSpecs {
 			float           dBmin               = -60.0f;
 			float           dBmax               = 6.0f;
-			float           warningThreshold    = -6.0f;
+			float           warningThreshold    = -12.0f;
 			float           clipThreshold       = 0.0f;
 			bool            showClipIndicator   = true;
 			Orientation     orientation         = Orientation::Free;

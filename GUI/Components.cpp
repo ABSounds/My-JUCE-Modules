@@ -410,7 +410,7 @@ namespace MyJUCEModules {
 			
 			clipIndicators.add(new ClipIndicator(colours.clipColour));
 			if (meterSpecs.showClipIndicator) {
-				addAndMakeVisible(clipIndicators.getLast());
+				addChildComponent(clipIndicators.getLast());
 			}
 		}
 	}
@@ -466,8 +466,6 @@ namespace MyJUCEModules {
 			auto meterBar = meterBars[channel];
 			meterBar->setBarFill(jlimit(0.f, 1.0f, jmap(dBLevel, meterSpecs.dBmin, meterSpecs.dBmax, 0.0f, 1.0f)));
 		}
-
-		repaint();
 	}
 
 	void LevelMeter::setColours(MeterColours colours) {
@@ -505,13 +503,19 @@ namespace MyJUCEModules {
 	}
 
 	void LevelMeter::MeterBar::setBarFill(float fillAmount) {
-		fill = fillAmount;
-		repaint();
+		if (fill != fillAmount) {
+			fill = fillAmount;
+			repaint();
+		}
 	}
 
 	void LevelMeter::MeterBar::paint(juce::Graphics& g) {
-		auto bounds = getLocalBounds();
+		auto bounds = getLocalBounds().reduced(getWidth()/20.f);
 		auto fillBounds = bounds;
+
+		juce::Path backgroundPath;
+		backgroundPath.addRoundedRectangle(bounds.toFloat(), bounds.getWidth()/8.f);
+		g.reduceClipRegion(backgroundPath);
 
 		juce::Rectangle<int> normalBounds, warningBounds, clipBounds;
 
@@ -531,7 +535,7 @@ namespace MyJUCEModules {
 		}
 
 		g.setColour(colours.backgroundColour);
-		g.fillRect(bounds);
+		g.fillPath(backgroundPath);
 		g.setColour(colours.normalColour);
 		g.fillRect(normalBounds);
 		g.setColour(colours.warningColour);
@@ -547,9 +551,9 @@ namespace MyJUCEModules {
 	LevelMeter::ClipIndicator::~ClipIndicator() { }
 
 	void LevelMeter::ClipIndicator::paint(juce::Graphics& g) {
-		auto bounds = getLocalBounds();
+		auto bounds = getLocalBounds().reduced(getWidth()/20.f);
 		g.setColour(colour);
-		g.fillRect(bounds);
+		g.fillRoundedRectangle(bounds.toFloat(), getWidth()/8.f);
 	}
 
 	void LevelMeter::ClipIndicator::setClipped(bool clipped) {
