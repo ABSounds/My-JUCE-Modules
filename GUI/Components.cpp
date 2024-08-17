@@ -405,7 +405,7 @@ namespace MyJUCEModules {
 		jassert(numChannels > 0);
 
 		for (auto i = 0; i < numChannels; i++) {
-			meterBars.add(new MeterBar(meterSpecs));
+			meterBars.add(new MeterBar(meterSpecs, colours));
 			addAndMakeVisible(meterBars.getLast());
 			
 			clipIndicators.add(new ClipIndicator(colours.clipColour));
@@ -481,7 +481,7 @@ namespace MyJUCEModules {
 
 	// =====================================  MeterBar  ================================================
 	
-	LevelMeter::MeterBar::MeterBar(MeterSpecs meterSpecs) {
+	LevelMeter::MeterBar::MeterBar(MeterSpecs& meterSpecs, MeterColours& colours) : meterSpecs(meterSpecs), colours(colours){
 		setSpecs(meterSpecs);
 	}
 
@@ -569,5 +569,23 @@ namespace MyJUCEModules {
 
 	void LevelMeter::ClipIndicator::mouseDown(const MouseEvent& event) {
 		setClipped(false);
+	}
+
+	// =====================================  MeterScale  ================================================
+
+	LevelMeter::MeterScale::MeterScale(MeterSpecs meterSpecs, MeterColours& colours) : meterSpecs(meterSpecs), colours(colours) { }
+
+	LevelMeter::MeterScale::~MeterScale() { }
+
+	void LevelMeter::MeterScale::setScaleValues(std::vector<float> scaleValues) {
+		this->scaleValues = scaleValues;
+		repaint();
+	}
+
+	void LevelMeter::MeterScale::paint(juce::Graphics& g) {
+		//TODO:
+		// Calcuate the position of each marker taking into account the skew factor
+		// Draw horizontal lines for the scale values
+		// Draw the scale values
 	}
 }

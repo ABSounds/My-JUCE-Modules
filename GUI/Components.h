@@ -135,6 +135,7 @@ namespace MyJUCEModules {
         struct MeterSpecs {
 			float           dBmin               = -60.0f;
 			float           dBmax               = 6.0f;
+			float           skewFactor          = 1.f;
 			float           warningThreshold    = -12.0f;
 			float           clipThreshold       = 0.0f;
 			bool            showClipIndicator   = true;
@@ -154,6 +155,7 @@ namespace MyJUCEModules {
     private:
         class MeterBar;
         class ClipIndicator;
+        class MeterScale;
 
         MeterSource& meterSource;
 		MeterSpecs meterSpecs;
@@ -169,7 +171,7 @@ namespace MyJUCEModules {
         class MeterBar : public juce::Component
         {
         public:
-            MeterBar(MeterSpecs meterSpecs);
+            MeterBar(MeterSpecs& meterSpecs, MeterColours& colours);
             ~MeterBar();
             void setOrientation(Orientation orientation);
             void setColours(LevelMeter::MeterColours colours);
@@ -182,8 +184,8 @@ namespace MyJUCEModules {
 			float warningThresholdLinear = 1.0f;
 			float clipThresholdLinear = 1.0f;
 
-            MeterColours colours;
-            MeterSpecs meterSpecs;
+            MeterSpecs& meterSpecs;
+            MeterColours& colours;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MeterBar)
         };
@@ -203,6 +205,23 @@ namespace MyJUCEModules {
             bool clipped = false;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClipIndicator)
+        };
+
+        class MeterScale : public juce::Component
+        {
+		public:
+			MeterScale(MeterSpecs meterSpecs, MeterColours& colours);
+			~MeterScale();
+			void setScaleValues(std::vector<float> scaleValues);
+			void paint(juce::Graphics& g) override;
+
+        private:
+			MeterSpecs& meterSpecs;
+            MeterColours& colours;
+            std::vector<float> scaleValues = {6.f, 0.f, -6.f, -12.f, -18.f, -24.f, -30.f, -40.f, -50.f, -60.f};
+			float skewFactor = 1.0f;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MeterScale)
         };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LevelMeter)
