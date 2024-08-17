@@ -405,7 +405,7 @@ namespace MyJUCEModules {
 		jassert(numChannels > 0);
 
 		for (auto i = 0; i < numChannels; i++) {
-			meterBars.add(new MeterBar(meterSpecs, colours));
+			meterBars.add(new MeterBar(this->meterSpecs, colours));
 			addAndMakeVisible(meterBars.getLast());
 			
 			clipIndicators.add(new ClipIndicator(colours.clipColour));
