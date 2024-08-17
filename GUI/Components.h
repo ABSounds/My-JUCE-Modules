@@ -113,11 +113,16 @@ namespace MyJUCEModules {
     class LevelMeter : public juce::Component
     {
     public:
-
+        /**
+        *   Orientation options for the meter:
+        *    * Vertical: Forces vertical
+		*    * Horizontal: Forces horizontal
+		*    * Free: Adapts the orientation to the aspect ratio of the component
+        **/
         enum Orientation{
             Vertical,
             Horizontal,
-            Free // Adapts the orientation depending on the aspect ratio of the component
+            Free
         };
 
         struct MeterColours {
@@ -133,6 +138,7 @@ namespace MyJUCEModules {
 			float           warningThreshold    = -12.0f;
 			float           clipThreshold       = 0.0f;
 			bool            showClipIndicator   = true;
+			bool            showScale           = false;
 			Orientation     orientation         = Orientation::Free;
         };
 
@@ -170,6 +176,7 @@ namespace MyJUCEModules {
 			void setSpecs(LevelMeter::MeterSpecs meterSpecs);
             void setBarFill(float fillAmount);
             void paint(juce::Graphics& g) override;
+
         private:
             float fill = 0.0f;
 			float warningThresholdLinear = 1.0f;
@@ -190,6 +197,7 @@ namespace MyJUCEModules {
             void setClipped(bool clipped);
 			void setColour(juce::Colour colour);
             void mouseDown (const MouseEvent &event) override;
+
         private:
             juce::Colour colour;
             bool clipped = false;
