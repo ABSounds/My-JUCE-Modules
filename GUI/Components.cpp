@@ -464,9 +464,9 @@ namespace MyJUCEModules {
 		auto numChannels = meterSource.getNumChannels();
 
 		for (auto channel = 0; channel < numChannels; channel++) {
-			auto dBLevel = juce::Decibels::gainToDecibels(meterSource.getRMS(channel), meterSpecs.dBmin);
+			auto dBLevel = jlimit(meterSpecs.meterRange.start, meterSpecs.meterRange.end, juce::Decibels::gainToDecibels(meterSource.getRMS(channel), meterSpecs.meterRange.start));
 			auto meterBar = meterBars[channel];
-			meterBar->setBarFill(jlimit(0.f, 1.0f, jmap(dBLevel, meterSpecs.dBmin, meterSpecs.dBmax, 0.0f, 1.0f)));
+			meterBar->setBarFill(meterSpecs.meterRange.convertTo0to1(dBLevel));
 		}
 	}
 
@@ -499,8 +499,8 @@ namespace MyJUCEModules {
 
 	void LevelMeter::MeterBar::setSpecs(MeterSpecs meterSpecs) {
 		this->meterSpecs = meterSpecs;
-		warningThresholdLinear = jmap(meterSpecs.warningThreshold, meterSpecs.dBmin, meterSpecs.dBmax, 0.0f, 1.0f);
-		clipThresholdLinear = jmap(meterSpecs.clipThreshold, meterSpecs.dBmin, meterSpecs.dBmax, 0.0f, 1.0f);
+		warningThresholdLinear = meterSpecs.meterRange.convertTo0to1(meterSpecs.warningThreshold);
+		clipThresholdLinear = meterSpecs.meterRange.convertTo0to1(meterSpecs.clipThreshold);
 		repaint();
 	}
 
@@ -512,7 +512,7 @@ namespace MyJUCEModules {
 	}
 
 	void LevelMeter::MeterBar::paint(juce::Graphics& g) {
-		auto bounds = getLocalBounds().reduced(getWidth()/20.f);
+		auto bounds = getLocalBounds().reduced(getWidth()/10.f);
 		auto fillBounds = bounds;
 
 		juce::Path backgroundPath;

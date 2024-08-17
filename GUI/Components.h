@@ -133,14 +133,12 @@ namespace MyJUCEModules {
         };
 
         struct MeterSpecs {
-			float           dBmin               = -60.0f;
-			float           dBmax               = 6.0f;
-			float           skewFactor          = 1.f;
-			float           warningThreshold    = -12.0f;
-			float           clipThreshold       = 0.0f;
-			bool            showClipIndicator   = true;
-			bool            showScale           = false;
-			Orientation     orientation         = Orientation::Free;
+			juce::NormalisableRange<float>  meterRange          = juce::NormalisableRange<float>(-60.0f, 6.0f, 0.01f, 1.5f);
+			float                           warningThreshold    = -12.0f;
+			float                           clipThreshold       = 0.0f;
+			bool                            showClipIndicator   = true;
+			bool                            showScale           = false;
+			Orientation                     orientation         = Orientation::Free;
         };
 
         /**
@@ -160,7 +158,7 @@ namespace MyJUCEModules {
         MeterSource& meterSource;
 		MeterSpecs meterSpecs;
 		MeterColours colours;
-
+        
         Orientation orientationToUse = Orientation::Vertical;
 
         size_t numChannels = 1;
