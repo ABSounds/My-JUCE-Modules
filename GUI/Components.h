@@ -134,11 +134,16 @@ namespace MyJUCEModules {
         };
 
         struct MeterLayout {
-			float clipIndicatorProportion       = 0.05f;
+            // Proportion of the height of the component taken by the clip indicator
+			float clipIndicatorProportion       = 0.06f;
+            // Proportion of the width of the component taken by the scale
 			float scaleProportion               = 0.4f;
+            // Proportion of the height of the component to be used as the padding around the meter bars
 			float barPaddingProportion          = 0.015f;
+            // Proportion of the width to be used as padding between the last meter bar and the scale
 			float barToScalePaddingProportion   = 0.05f;
-            float fontSize;
+            // Size of the font to use for the scale
+            float scaleFontSizeProportion       = 0.05f;
         };
 
         struct MeterSpecs {

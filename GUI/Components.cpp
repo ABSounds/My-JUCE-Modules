@@ -574,7 +574,9 @@ namespace MyJUCEModules {
 
 	// =====================================  ClipIndicator  ================================================
 
-	LevelMeter::ClipIndicator::ClipIndicator(MeterSpecs& meterSpecs, juce::Colour colour) : meterSpecs(meterSpecs), colour(colour) { }
+	LevelMeter::ClipIndicator::ClipIndicator(MeterSpecs& meterSpecs, juce::Colour colour) : meterSpecs(meterSpecs), colour(colour) {
+		setMouseCursor(juce::MouseCursor::PointingHandCursor);
+	}
 
 	LevelMeter::ClipIndicator::~ClipIndicator() { }
 
@@ -615,11 +617,11 @@ namespace MyJUCEModules {
 		for (auto i = 0; i < scaleValues.size(); i++) {
 			auto value = scaleValues[i];
 			auto y = yStart + padding + (getHeight() - (yStart + 2 * padding))  * (1.0f - meterSpecs.meterRange.convertTo0to1(value));
-			auto markerHeight = getHeight() / 20.f;
+			auto fontSize = getHeight() * meterSpecs.layout.scaleFontSizeProportion;
 			g.setColour(colours.scaleColour);
 			g.drawHorizontalLine(y, 0.0f, (float)getWidth() * 0.2f);
-			g.setFont(markerHeight);
-			g.drawText(juce::String(value), getWidth() * 0.4f, y - markerHeight * 0.5f, (float)getWidth() * 0.6f, markerHeight, juce::Justification::left);
+			g.setFont(fontSize);
+			g.drawText(juce::String(value), getWidth() * 0.4f, y - fontSize * 0.5f, (float)getWidth() * 0.6f, fontSize, juce::Justification::left);
 		}
 	}
 }
