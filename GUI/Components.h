@@ -142,7 +142,7 @@ namespace MyJUCEModules {
         };
 
         struct MeterSpecs {
-			juce::NormalisableRange<float>  meterRange          = juce::NormalisableRange<float>(-60.0f, 6.0f, 0.01f, 0.5f);
+			juce::NormalisableRange<float>  meterRange          = juce::NormalisableRange<float>(-60.0f, 6.0f, 0.01f, 1.5f);
 			float                           warningThreshold    = -12.0f;
 			float                           clipThreshold       = 0.0f;
 			bool                            showClipIndicator   = true;
@@ -158,6 +158,7 @@ namespace MyJUCEModules {
         LevelMeter(MeterSource& source, MeterSpecs meterSpecs);
         void resized() override;
         void update();
+		void setScaleValues(std::vector<float> scaleValues);
 		void setColours(MeterColours colours);
 
     private:

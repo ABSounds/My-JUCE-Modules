@@ -492,6 +492,10 @@ namespace MyJUCEModules {
 		}
 	}
 
+	void LevelMeter::setScaleValues(std::vector<float> scaleValues) {
+		meterScale->setScaleValues(scaleValues);
+	}
+
 	void LevelMeter::setColours(MeterColours colours) {
 		
 		for (auto i = 0; i < meterBars.size(); i++) {
