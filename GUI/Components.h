@@ -127,18 +127,28 @@ namespace MyJUCEModules {
 
         struct MeterColours {
             juce::Colour backgroundColour   = juce::Colours::darkgrey;
-			juce::Colour normalColour       = juce::Colours::whitesmoke;
+			juce::Colour normalColour       = juce::Colours::gainsboro;
             juce::Colour warningColour      = juce::Colours::orange;
-            juce::Colour clipColour         = juce::Colours::red;
+            juce::Colour clipColour         = juce::Colours::red.darker();
+			juce::Colour scaleColour        = juce::Colours::gainsboro;
+        };
+
+        struct MeterLayout {
+			float clipIndicatorProportion       = 0.05f;
+			float scaleProportion               = 0.4f;
+			float barPaddingProportion          = 0.015f;
+			float barToScalePaddingProportion   = 0.05f;
+            float fontSize;
         };
 
         struct MeterSpecs {
-			juce::NormalisableRange<float>  meterRange          = juce::NormalisableRange<float>(-60.0f, 6.0f, 0.01f, 1.5f);
+			juce::NormalisableRange<float>  meterRange          = juce::NormalisableRange<float>(-60.0f, 6.0f, 0.01f, 0.5f);
 			float                           warningThreshold    = -12.0f;
 			float                           clipThreshold       = 0.0f;
 			bool                            showClipIndicator   = true;
-			bool                            showScale           = false;
+			bool                            showScale           = true;
 			Orientation                     orientation         = Orientation::Free;
+			MeterLayout                     layout;
         };
 
         /**
@@ -165,6 +175,7 @@ namespace MyJUCEModules {
 
         juce::OwnedArray<MeterBar> meterBars;
         juce::OwnedArray<ClipIndicator> clipIndicators;
+		std::unique_ptr <MeterScale> meterScale;
 
         class MeterBar : public juce::Component
         {
@@ -191,7 +202,7 @@ namespace MyJUCEModules {
 		class ClipIndicator : public juce::Component, juce::MouseListener//, juce::ChangeListener
         {
         public:
-            ClipIndicator(juce::Colour colour);
+            ClipIndicator(MeterSpecs& meterSpecs, juce::Colour colour);
             ~ClipIndicator();
             void paint(juce::Graphics& g) override;
             void setClipped(bool clipped);
@@ -199,6 +210,7 @@ namespace MyJUCEModules {
             void mouseDown (const MouseEvent &event) override;
 
         private:
+            MeterSpecs& meterSpecs;
             juce::Colour colour;
             bool clipped = false;
 
@@ -208,7 +220,7 @@ namespace MyJUCEModules {
         class MeterScale : public juce::Component
         {
 		public:
-			MeterScale(MeterSpecs meterSpecs, MeterColours& colours);
+			MeterScale(MeterSpecs& meterSpecs, MeterColours& colours);
 			~MeterScale();
 			void setScaleValues(std::vector<float> scaleValues);
 			void paint(juce::Graphics& g) override;

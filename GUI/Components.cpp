@@ -408,17 +408,22 @@ namespace MyJUCEModules {
 			meterBars.add(new MeterBar(this->meterSpecs, colours));
 			addAndMakeVisible(meterBars.getLast());
 			
-			clipIndicators.add(new ClipIndicator(colours.clipColour));
+			clipIndicators.add(new ClipIndicator(this->meterSpecs, colours.clipColour));
 			if (meterSpecs.showClipIndicator) {
-				addChildComponent(clipIndicators.getLast());
+				addAndMakeVisible(clipIndicators.getLast());
+				//addChildComponent(clipIndicators.getLast());
 			}
+		}
+		if (meterSpecs.showScale) {
+			meterScale = std::make_unique<MeterScale>(this->meterSpecs, colours);
+			addAndMakeVisible(meterScale.get());
 		}
 	}
     
 	void LevelMeter::resized() {
 		auto bounds = getLocalBounds();
 
-		auto clipIndicatorProportion = meterSpecs.showClipIndicator ? 0.1f : 0.0f;
+		auto clipIndicatorProportion = meterSpecs.showClipIndicator ? meterSpecs.layout.clipIndicatorProportion : 0.0f;
 
 		orientationToUse = meterSpecs.orientation == Free ? bounds.getWidth() > bounds.getHeight() ? Horizontal : Vertical : meterSpecs.orientation;
 		numChannels = meterBars.size();
@@ -428,17 +433,34 @@ namespace MyJUCEModules {
 		switch (orientationToUse) {
 			case Vertical:
 			{
+				juce::Rectangle<int> clipIndicatorBounds;
+
+				if (meterSpecs.showScale) {
+					auto scaleWidth = bounds.getWidth() * meterSpecs.layout.scaleProportion;
+					auto paddingWidth = bounds.getWidth() * meterSpecs.layout.barToScalePaddingProportion;
+					auto scaleBounds = bounds.removeFromRight(scaleWidth);
+					scaleBounds.removeFromLeft(paddingWidth);
+					meterScale->setBounds(scaleBounds);
+				}
+
+				if (meterSpecs.showClipIndicator) {
+					clipIndicatorBounds = bounds.removeFromTop(bounds.getHeight() * clipIndicatorProportion);
+				}
+
 				auto meterWidth = bounds.getWidth() / numChannels;
 				for (auto ch = 0; ch < numChannels; ch++) {
 					auto meterBar = meterBars[ch];
 					auto clipIndicator = clipIndicators[ch];
 					auto meterBarBounds = bounds.removeFromLeft(meterWidth);
 					if (meterSpecs.showClipIndicator) {
-						clipIndicator->setBounds(meterBarBounds.removeFromTop(meterBarBounds.getHeight() * clipIndicatorProportion));
+						auto paddedClipIndicatorBounds = clipIndicatorBounds.removeFromLeft(meterWidth).reduced(getHeight() * meterSpecs.layout.barPaddingProportion);
+						clipIndicator->setBounds(paddedClipIndicatorBounds);
 					}
 					meterBar->setOrientation(orientationToUse);
-					meterBar->setBounds(meterBarBounds);
+					auto paddedMeterBarBounds = meterBarBounds.reduced(getHeight() * meterSpecs.layout.barPaddingProportion);
+					meterBar->setBounds(paddedMeterBarBounds);
 				}
+
 				break;
 			}
 			case Horizontal:
@@ -512,7 +534,7 @@ namespace MyJUCEModules {
 	}
 
 	void LevelMeter::MeterBar::paint(juce::Graphics& g) {
-		auto bounds = getLocalBounds().reduced(getWidth()/10.f);
+		auto bounds = getLocalBounds();
 		auto fillBounds = bounds;
 
 		juce::Path backgroundPath;
@@ -548,12 +570,12 @@ namespace MyJUCEModules {
 
 	// =====================================  ClipIndicator  ================================================
 
-	LevelMeter::ClipIndicator::ClipIndicator(juce::Colour colour) : colour(colour) { }
+	LevelMeter::ClipIndicator::ClipIndicator(MeterSpecs& meterSpecs, juce::Colour colour) : meterSpecs(meterSpecs), colour(colour) { }
 
 	LevelMeter::ClipIndicator::~ClipIndicator() { }
 
 	void LevelMeter::ClipIndicator::paint(juce::Graphics& g) {
-		auto bounds = getLocalBounds().reduced(getWidth()/20.f);
+		auto bounds = getLocalBounds();
 		g.setColour(colour);
 		g.fillRoundedRectangle(bounds.toFloat(), getWidth()/8.f);
 	}
@@ -573,7 +595,7 @@ namespace MyJUCEModules {
 
 	// =====================================  MeterScale  ================================================
 
-	LevelMeter::MeterScale::MeterScale(MeterSpecs meterSpecs, MeterColours& colours) : meterSpecs(meterSpecs), colours(colours) { }
+	LevelMeter::MeterScale::MeterScale(MeterSpecs& meterSpecs, MeterColours& colours) : meterSpecs(meterSpecs), colours(colours) { }
 
 	LevelMeter::MeterScale::~MeterScale() { }
 
@@ -583,9 +605,17 @@ namespace MyJUCEModules {
 	}
 
 	void LevelMeter::MeterScale::paint(juce::Graphics& g) {
-		//TODO:
-		// Calcuate the position of each marker taking into account the skew factor
-		// Draw horizontal lines for the scale values
-		// Draw the scale values
+		auto yStart = getHeight() * (meterSpecs.layout.clipIndicatorProportion * meterSpecs.showClipIndicator);
+		auto padding = getParentHeight() * meterSpecs.layout.barPaddingProportion;
+
+		for (auto i = 0; i < scaleValues.size(); i++) {
+			auto value = scaleValues[i];
+			auto y = yStart + padding + (getHeight() - (yStart + 2 * padding))  * (1.0f - meterSpecs.meterRange.convertTo0to1(value));
+			auto markerHeight = getHeight() / 20.f;
+			g.setColour(colours.scaleColour);
+			g.drawHorizontalLine(y, 0.0f, (float)getWidth() * 0.2f);
+			g.setFont(markerHeight);
+			g.drawText(juce::String(value), getWidth() * 0.4f, y - markerHeight * 0.5f, (float)getWidth() * 0.6f, markerHeight, juce::Justification::left);
+		}
 	}
 }
