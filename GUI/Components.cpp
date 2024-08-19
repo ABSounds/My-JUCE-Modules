@@ -407,6 +407,11 @@ namespace MyJUCEModules {
 		for (auto i = 0; i < numChannels; i++) {
 			meterBars.add(new MeterBar(this->meterSpecs, colours));
 			addAndMakeVisible(meterBars.getLast());
+
+			barScales.add(new BarScale(this->meterSpecs, colours));
+			if (meterSpecs.showScale && meterSpecs.scaleInMeterBar) {
+				addAndMakeVisible(barScales.getLast());
+			}
 			
 			clipIndicators.add(new ClipIndicator(this->meterSpecs, colours.clipColour));
 			if (meterSpecs.showClipIndicator) {
@@ -416,7 +421,7 @@ namespace MyJUCEModules {
 		}
 		if (meterSpecs.showScale) {
 			meterScale = std::make_unique<MeterScale>(this->meterSpecs, colours);
-			addAndMakeVisible(meterScale.get());
+			//addAndMakeVisible(meterScale.get());
 		}
 	}
     
@@ -436,11 +441,11 @@ namespace MyJUCEModules {
 				juce::Rectangle<int> clipIndicatorBounds;
 
 				if (meterSpecs.showScale) {
+					meterScale->setBounds(bounds);
 					auto scaleWidth = bounds.getWidth() * meterSpecs.layout.scaleProportion;
 					auto paddingWidth = bounds.getWidth() * meterSpecs.layout.barToScalePaddingProportion;
 					auto scaleBounds = bounds.removeFromRight(scaleWidth);
 					scaleBounds.removeFromLeft(paddingWidth);
-					meterScale->setBounds(scaleBounds);
 				}
 
 				if (meterSpecs.showClipIndicator) {
@@ -459,6 +464,7 @@ namespace MyJUCEModules {
 					meterBar->setOrientation(orientationToUse);
 					auto paddedMeterBarBounds = meterBarBounds.reduced(getHeight() * meterSpecs.layout.barPaddingProportion);
 					meterBar->setBounds(paddedMeterBarBounds);
+					barScales[ch]->setBounds(paddedMeterBarBounds);
 				}
 
 				break;
@@ -621,7 +627,24 @@ namespace MyJUCEModules {
 			g.setColour(colours.scaleColour);
 			g.drawHorizontalLine(y, 0.0f, (float)getWidth() * 0.2f);
 			g.setFont(fontSize);
-			g.drawText(juce::String(value), getWidth() * 0.4f, y - fontSize * 0.5f, (float)getWidth() * 0.6f, fontSize, juce::Justification::left);
+			g.drawText(juce::String(abs(value)), getWidth() * 0.4f, y - fontSize * 0.5f, (float)getWidth() * 0.6f, fontSize, juce::Justification::left);
+		}
+	}
+
+	// =====================================  BarScale  ================================================
+
+	void LevelMeter::BarScale::paint(juce::Graphics& g) {
+		
+		for (auto i = 1; i < scaleValues.size() - 1; i++) {
+			juce::Path path;
+			auto bounds = getLocalBounds();
+			path.addRoundedRectangle(bounds.toFloat().reduced(1.f), bounds.getWidth() / 8.f);
+			auto value = scaleValues[i];
+			auto y = getHeight() * (1.0f - meterSpecs.meterRange.convertTo0to1(value));
+			g.setColour(colours.scaleColour);
+			//g.drawHorizontalLine(y, 0.0f, (float)getWidth());
+			g.strokePath(path, juce::PathStrokeType{ 1.f });
+			//g.fillPath(path);
 		}
 	}
 }

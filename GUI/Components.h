@@ -128,9 +128,9 @@ namespace MyJUCEModules {
         struct MeterColours {
             juce::Colour backgroundColour   = juce::Colours::darkgrey;
 			juce::Colour normalColour       = juce::Colours::gainsboro;
-            juce::Colour warningColour      = juce::Colours::orange;
-            juce::Colour clipColour         = juce::Colours::red.darker();
-			juce::Colour scaleColour        = juce::Colours::gainsboro;
+            juce::Colour warningColour      = juce::Colours::peru;
+            juce::Colour clipColour         = juce::Colours::red.darker();//.darker();
+			juce::Colour scaleColour        = juce::Colours::darkgrey.darker();
         };
 
         struct MeterLayout {
@@ -152,6 +152,7 @@ namespace MyJUCEModules {
 			float                           clipThreshold       = 0.0f;
 			bool                            showClipIndicator   = true;
 			bool                            showScale           = true;
+            bool                            scaleInMeterBar     = true;
 			Orientation                     orientation         = Orientation::Free;
 			MeterLayout                     layout;
         };
@@ -170,6 +171,7 @@ namespace MyJUCEModules {
         class MeterBar;
         class ClipIndicator;
         class MeterScale;
+        class BarScale;
 
         MeterSource& meterSource;
 		MeterSpecs meterSpecs;
@@ -180,6 +182,7 @@ namespace MyJUCEModules {
         size_t numChannels = 1;
 
         juce::OwnedArray<MeterBar> meterBars;
+        juce::OwnedArray<BarScale> barScales;
         juce::OwnedArray<ClipIndicator> clipIndicators;
 		std::unique_ptr <MeterScale> meterScale;
 
@@ -231,13 +234,21 @@ namespace MyJUCEModules {
 			void setScaleValues(std::vector<float> scaleValues);
 			void paint(juce::Graphics& g) override;
 
-        private:
+        protected:
 			MeterSpecs& meterSpecs;
             MeterColours& colours;
             std::vector<float> scaleValues = {6.f, 0.f, -6.f, -12.f, -18.f, -24.f, -30.f, -40.f, -50.f, -60.f};
-			float skewFactor = 1.0f;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MeterScale)
+        };
+
+        class BarScale : public MeterScale
+        {
+        public:
+			using MeterScale::MeterScale;
+            void paint(juce::Graphics& g) override;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BarScale)
         };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LevelMeter)
